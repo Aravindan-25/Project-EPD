@@ -151,14 +151,14 @@ export function ProjectsView() {
           </div>
         </div>
 
-        {/* Solid Tabs Navigation Header */}
+        {/* Project Types Tabs Header (Attaches directly to table below) */}
         <div className="bg-card px-4 pt-2">
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="h-10 space-x-6 border-b border-transparent bg-transparent p-0">
+            <TabsList className="h-10 space-x-6 border-b-0 bg-transparent p-0">
               <TabsTrigger
                 value="client_projects"
                 className="data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground rounded-none border-b-2 border-transparent bg-transparent px-1 py-2 text-xs font-semibold transition-all data-[state=active]:bg-transparent"
@@ -182,144 +182,142 @@ export function ProjectsView() {
         </div>
       </div>
 
-      {/* SCROLLABLE TABLE AREA ONLY */}
-      <div className="flex-1 overflow-auto p-4">
-        <div className="border-border bg-card border shadow-sm">
-          <table className="w-full border-collapse text-left text-xs">
-            {/* Sticky Table Column Headers with 100% Solid Background */}
-            <thead className="border-border bg-secondary text-muted-foreground sticky top-0 z-10 border-b font-medium tracking-wider uppercase opacity-100 shadow-sm">
-              <tr>
-                <th className="bg-secondary w-2/5 p-3">Name</th>
-                <th className="bg-secondary p-3">Stage</th>
-                <th className="bg-secondary p-3">Period</th>
-                <th className="bg-secondary p-3">Manager</th>
-                <th className="bg-secondary w-48 p-3">Progress</th>
-                <th className="bg-secondary p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-border/50 divide-y">
-              {STAGE_GROUPS.map((group) => {
-                const groupProjects = filteredProjects.filter(
-                  (p) => p.stageGroup === group.name,
-                );
+      {/* SCROLLABLE TABLE AREA - DIRECTLY ATTACHED TO TABS */}
+      <div className="flex-1 overflow-auto">
+        <table className="w-full border-collapse text-left text-xs">
+          {/* Sticky Table Column Headers - Seamless Attachment */}
+          <thead className="border-border bg-secondary text-muted-foreground sticky top-0 z-10 border-b font-medium tracking-wider uppercase opacity-100 shadow-sm">
+            <tr>
+              <th className="bg-secondary w-2/5 p-3">Name</th>
+              <th className="bg-secondary p-3">Stage</th>
+              <th className="bg-secondary p-3">Period</th>
+              <th className="bg-secondary p-3">Manager</th>
+              <th className="bg-secondary w-48 p-3">Progress</th>
+              <th className="bg-secondary p-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-border/50 bg-card divide-y">
+            {STAGE_GROUPS.map((group) => {
+              const groupProjects = filteredProjects.filter(
+                (p) => p.stageGroup === group.name,
+              );
 
-                if (groupProjects.length === 0 && searchQuery) return null;
+              if (groupProjects.length === 0 && searchQuery) return null;
 
-                return (
-                  <tr key={group.name} className="contents">
-                    {/* Stage Group Section Title Header */}
-                    <tr className="bg-secondary/60 border-border border-t border-b">
-                      <td
-                        colSpan={6}
-                        className="text-foreground px-3 py-2.5 text-xs font-semibold"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className={`h-2.5 w-2.5 ${group.dotColor}`} />
-                          <span>{group.name}</span>
-                          <span className="text-muted-foreground text-[10px] font-normal">
-                            ({groupProjects.length})
+              return (
+                <tr key={group.name} className="contents">
+                  {/* Stage Group Section Title Header */}
+                  <tr className="bg-secondary/60 border-border border-t border-b">
+                    <td
+                      colSpan={6}
+                      className="text-foreground px-3 py-2.5 text-xs font-semibold"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`h-2.5 w-2.5 ${group.dotColor}`} />
+                        <span>{group.name}</span>
+                        <span className="text-muted-foreground text-[10px] font-normal">
+                          ({groupProjects.length})
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  {/* Project Rows under Group */}
+                  {groupProjects.map((project) => (
+                    <tr
+                      key={project.id}
+                      className="hover:bg-secondary/40 border-border/40 border-b transition-colors"
+                    >
+                      {/* Name Column */}
+                      <td className="px-3 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-secondary text-foreground border-border flex h-7 w-7 items-center justify-center border text-xs font-bold">
+                            {project.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-foreground text-xs font-semibold">
+                            {project.name}
                           </span>
                         </div>
                       </td>
-                    </tr>
 
-                    {/* Project Rows under Group */}
-                    {groupProjects.map((project) => (
-                      <tr
-                        key={project.id}
-                        className="hover:bg-secondary/40 border-border/40 border-b transition-colors"
-                      >
-                        {/* Name Column */}
-                        <td className="px-3 py-3">
-                          <div className="flex items-center gap-3">
-                            <div className="bg-secondary text-foreground border-border flex h-7 w-7 items-center justify-center border text-xs font-bold">
-                              {project.name.charAt(0).toUpperCase()}
-                            </div>
-                            <span className="text-foreground text-xs font-semibold">
-                              {project.name}
-                            </span>
+                      {/* Stage Column */}
+                      <td className="px-3 py-3">
+                        <Badge
+                          variant="outline"
+                          className="rounded-none border-orange-500/30 bg-orange-500/10 px-2 py-0.5 text-[11px] font-normal text-orange-500"
+                        >
+                          {project.stage}
+                        </Badge>
+                      </td>
+
+                      {/* Period Column */}
+                      <td className="text-muted-foreground px-3 py-3 font-mono text-xs">
+                        {project.periodStart} - {project.periodEnd}
+                      </td>
+
+                      {/* Manager Column */}
+                      <td className="px-3 py-3">
+                        <div className="border-border bg-secondary/50 text-foreground inline-flex items-center gap-1.5 border px-2 py-1 text-xs">
+                          <div className="bg-primary/20 text-primary flex h-5 w-5 items-center justify-center text-[10px] font-bold">
+                            {project.managerName.charAt(0)}
                           </div>
-                        </td>
+                          <span className="font-medium">
+                            {project.managerName}
+                          </span>
+                          <span className="text-muted-foreground text-[10px]">
+                            ({project.managerCode})
+                          </span>
+                          <ChevronDown className="text-muted-foreground ml-1 h-3 w-3" />
+                        </div>
+                      </td>
 
-                        {/* Stage Column */}
-                        <td className="px-3 py-3">
-                          <Badge
+                      {/* Progress Column */}
+                      <td className="px-3 py-3">
+                        <div className="flex items-center gap-2">
+                          <Progress
+                            value={project.progress}
+                            className="bg-secondary h-1.5 flex-1 rounded-none"
+                          />
+                          <span className="text-muted-foreground w-8 text-right font-mono text-[11px] font-medium">
+                            {project.progress}%
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Actions Column */}
+                      <td className="px-3 py-3 text-right">
+                        <div className="inline-flex items-center gap-1">
+                          <Button
                             variant="outline"
-                            className="rounded-none border-orange-500/30 bg-orange-500/10 px-2 py-0.5 text-[11px] font-normal text-orange-500"
+                            size="icon"
+                            className="border-border hover:bg-secondary h-7 w-7 rounded-none"
                           >
-                            {project.stage}
-                          </Badge>
-                        </td>
-
-                        {/* Period Column */}
-                        <td className="text-muted-foreground px-3 py-3 font-mono text-xs">
-                          {project.periodStart} - {project.periodEnd}
-                        </td>
-
-                        {/* Manager Column */}
-                        <td className="px-3 py-3">
-                          <div className="border-border bg-secondary/50 text-foreground inline-flex items-center gap-1.5 border px-2 py-1 text-xs">
-                            <div className="bg-primary/20 text-primary flex h-5 w-5 items-center justify-center text-[10px] font-bold">
-                              {project.managerName.charAt(0)}
-                            </div>
-                            <span className="font-medium">
-                              {project.managerName}
-                            </span>
-                            <span className="text-muted-foreground text-[10px]">
-                              ({project.managerCode})
-                            </span>
-                            <ChevronDown className="text-muted-foreground ml-1 h-3 w-3" />
-                          </div>
-                        </td>
-
-                        {/* Progress Column */}
-                        <td className="px-3 py-3">
-                          <div className="flex items-center gap-2">
-                            <Progress
-                              value={project.progress}
-                              className="bg-secondary h-1.5 flex-1 rounded-none"
-                            />
-                            <span className="text-muted-foreground w-8 text-right font-mono text-[11px] font-medium">
-                              {project.progress}%
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Actions Column */}
-                        <td className="px-3 py-3 text-right">
-                          <div className="inline-flex items-center gap-1">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="border-border hover:bg-secondary h-7 w-7 rounded-none"
-                            >
-                              <Pencil className="text-muted-foreground h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleDeleteProject(project.id)}
-                              className="border-border hover:bg-destructive/10 hover:text-destructive h-7 w-7 rounded-none"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="border-border hover:bg-secondary h-7 w-7 rounded-none"
-                            >
-                              <ExternalLink className="text-muted-foreground h-3 w-3" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                            <Pencil className="text-muted-foreground h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleDeleteProject(project.id)}
+                            className="border-border hover:bg-destructive/10 hover:text-destructive h-7 w-7 rounded-none"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="border-border hover:bg-secondary h-7 w-7 rounded-none"
+                          >
+                            <ExternalLink className="text-muted-foreground h-3 w-3" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
       {/* Floating Chat Widget Button (Bottom Right) */}
