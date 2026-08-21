@@ -1,25 +1,35 @@
 import { z } from "zod";
 
-export const clientSchema = z.object({
-  id: z.string(),
-  name: z.string().min(2, "Client name must be at least 2 characters"),
-  code: z.string(),
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
+export const contactPersonSchema = z.object({
+  name: z.string().optional(),
+  designation: z.string().optional(),
+  email: z.string().optional(),
   phone: z.string().optional(),
-  gstNumber: z.string().optional(),
-  industry: z.string(),
-  projectCount: z.number().min(0),
-  managerName: z.string().optional(),
-  managerCode: z.string().optional(),
+  isPrimary: z.boolean(),
 });
 
-export type Client = z.infer<typeof clientSchema>;
-
-export const createClientFormSchema = clientSchema.omit({
-  id: true,
+export const createClientFormSchema = z.object({
+  name: z.string().min(2, "Client name must be at least 2 characters"),
+  code: z.string().min(1, "Client ID is required"),
+  industry: z.string(),
+  projectCount: z.number().min(0),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  gstNumber: z.string().optional(),
+  managerName: z.string().optional(),
+  managerCode: z.string().optional(),
+  address: z.string().optional(),
+  loginEmail: z.string().optional(),
+  contactPersons: z.array(contactPersonSchema).optional(),
 });
 
 export type CreateClientFormValues = z.infer<typeof createClientFormSchema>;
+
+export const clientSchema = createClientFormSchema.extend({
+  id: z.string(),
+});
+
+export type Client = z.infer<typeof clientSchema>;
 
 export const SAMPLE_CLIENTS: Client[] = [
   {
