@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Fragment } from "react";
 import { useQueryState, parseAsString } from "nuqs";
 import {
   Search,
@@ -246,7 +246,7 @@ export function ProjectsView() {
                 if (groupProjects.length === 0 && searchQuery) return null;
 
                 return (
-                  <tr key={group.name} className="contents">
+                  <Fragment key={group.name}>
                     {/* Stage Group Section Title Header */}
                     <tr className="bg-secondary/60 border-border border-t border-b">
                       <td
@@ -354,7 +354,7 @@ export function ProjectsView() {
                         </td>
                       </tr>
                     ))}
-                  </tr>
+                  </Fragment>
                 );
               })}
             </tbody>

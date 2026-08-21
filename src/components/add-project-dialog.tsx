@@ -35,7 +35,6 @@ interface AddProjectDialogProps {
 
 export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
   const [open, setOpen] = useState(false);
-  const [createMore, setCreateMore] = useState(false);
   const [iconPreview, setIconPreview] = useState<string | null>(null);
 
   const {
@@ -84,30 +83,9 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
     };
 
     onAddProject(newProject);
-
-    if (createMore) {
-      reset({
-        name: "",
-        code: "",
-        stageGroup: "New",
-        stage: "New",
-        periodStart: "01 Mar 2025",
-        periodEnd: "30 Sep 2025",
-        managerName: "Vikas Singh",
-        managerCode: "AILOITTE-45",
-        progress: 0,
-        clientType: "client",
-        description: "",
-        clientName: "",
-        contactPerson: "",
-        deliveryHead: "Vikas Singh",
-      });
-      setIconPreview(null);
-    } else {
-      reset();
-      setIconPreview(null);
-      setOpen(false);
-    }
+    reset();
+    setIconPreview(null);
+    setOpen(false);
   };
 
   return (
@@ -125,13 +103,8 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
         {/* BREADCRUMB HEADER MATCHING SCREENSHOT */}
         <DialogHeader className="border-border/80 border-b pb-3">
           <div className="text-foreground flex items-center gap-2 text-xs font-semibold">
-            <div className="flex h-5 w-5 items-center justify-center bg-amber-600 text-[10px] font-bold text-white">
-              A
-            </div>
-            <span>Ailoitte-Technologies-Pvt-Ltd</span>
-            <span className="text-muted-foreground">&gt;</span>
-            <DialogTitle className="text-foreground text-xs font-bold">
-              Add Project
+            <DialogTitle className="text-base font-bold">
+              Add New Client
             </DialogTitle>
           </div>
           <DialogDescription className="text-muted-foreground mt-1 text-[11px]">
@@ -441,20 +414,7 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
 
           {/* FOOTER ACTIONS */}
           <DialogFooter className="border-border flex flex-row items-center justify-between border-t pt-4 sm:justify-between">
-            <div className="flex items-center gap-2">
-              <label className="relative inline-flex cursor-pointer items-center">
-                <input
-                  type="checkbox"
-                  checked={createMore}
-                  onChange={(e) => setCreateMore(e.target.checked)}
-                  className="peer sr-only"
-                />
-                <div className="peer bg-secondary peer-checked:bg-primary border-border after:border-border h-5 w-9 border transition-colors peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:border after:bg-white after:transition-all peer-checked:after:translate-x-full" />
-              </label>
-              <span className="text-foreground text-xs font-medium">
-                Create more
-              </span>
-            </div>
+            <div className="flex items-center gap-2"></div>
 
             <Button
               type="submit"

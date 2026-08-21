@@ -35,7 +35,6 @@ interface AddClientDialogProps {
 
 export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
   const [open, setOpen] = useState(false);
-  const [createMore, setCreateMore] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const {
@@ -97,30 +96,9 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
     };
 
     onAddClient(newClient);
-
-    if (createMore) {
-      reset({
-        name: "",
-        code: "",
-        email: "",
-        phone: "",
-        gstNumber: "",
-        industry: "Software",
-        projectCount: 0,
-        managerName: "Rahul Yadav",
-        managerCode: "AILOITTE-89",
-        address: "",
-        loginEmail: "",
-        contactPersons: [
-          { name: "", designation: "", email: "", phone: "", isPrimary: true },
-        ],
-      });
-      setLogoPreview(null);
-    } else {
-      reset();
-      setLogoPreview(null);
-      setOpen(false);
-    }
+    reset();
+    setLogoPreview(null);
+    setOpen(false);
   };
 
   return (
@@ -460,20 +438,7 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
 
           {/* FOOTER ACTIONS */}
           <DialogFooter className="border-border flex flex-row items-center justify-between border-t pt-4 sm:justify-between">
-            <div className="flex items-center gap-2">
-              <label className="relative inline-flex cursor-pointer items-center">
-                <input
-                  type="checkbox"
-                  checked={createMore}
-                  onChange={(e) => setCreateMore(e.target.checked)}
-                  className="peer sr-only"
-                />
-                <div className="peer bg-secondary peer-checked:bg-primary border-border after:border-border h-5 w-9 border transition-colors peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:border after:bg-white after:transition-all peer-checked:after:translate-x-full" />
-              </label>
-              <span className="text-foreground text-xs font-medium">
-                Create more
-              </span>
-            </div>
+            <div className="flex items-center gap-2"></div>
 
             <Button
               type="submit"
