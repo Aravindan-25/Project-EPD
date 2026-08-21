@@ -10,15 +10,20 @@ import {
   Trash2,
   ExternalLink,
   ChevronDown,
+  ShieldAlert,
 } from "lucide-react";
 import {
   SAMPLE_PROJECTS,
+  USER_PROFILES,
   type Project,
   type ProjectStage,
+  type TeamMember,
+  type UserRoleProfile,
 } from "@/types/project";
 import { SAMPLE_CLIENTS, type Client } from "@/types/client";
 import { AddProjectDialog } from "@/components/add-project-dialog";
 import { AddClientDialog } from "@/components/add-client-dialog";
+import { ManageTeamDialog } from "@/components/manage-team-dialog";
 import { ClientsTable } from "@/components/clients-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +56,10 @@ export function ProjectsView() {
     "q",
     parseAsString.withDefault(""),
   );
+  const [userCode] = useQueryState("user", parseAsString.withDefault("ADMIN"));
+
+  const currentUser: UserRoleProfile =
+    USER_PROFILES.find((u) => u.code === userCode) || USER_PROFILES[0];
 
   const handleAddProject = (newProject: Project) => {
     setProjects((prev) => [newProject, ...prev]);
@@ -58,6 +67,12 @@ export function ProjectsView() {
 
   const handleDeleteProject = (id: string) => {
     setProjects((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const handleUpdateTeam = (projectId: string, teamMembers: TeamMember[]) => {
+    setProjects((prev) =>
+      prev.map((p) => (p.id === projectId ? { ...p, teamMembers } : p)),
+    );
   };
 
   const handleAddClient = (newClient: Client) => {
@@ -68,14 +83,24 @@ export function ProjectsView() {
     setClients((prev) => prev.filter((c) => c.id !== id));
   };
 
-  // Filter projects by search query & tab
+  // RBAC Filtering: If PM is logged in, show ONLY assigned projects!
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
+      // 1. Role-based check
+      const isAssignedToPM =
+        currentUser.role === "admin" ||
+        project.managerCode === currentUser.code ||
+        project.managerName.toLowerCase() === currentUser.name.toLowerCase();
+
+      if (!isAssignedToPM) return false;
+
+      // 2. Search query check
       const matchesSearch =
         project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.managerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.managerCode.toLowerCase().includes(searchQuery.toLowerCase());
 
+      // 3. Active tab check
       const matchesTab =
         activeTab === "client_projects"
           ? project.clientType === "client"
@@ -85,7 +110,7 @@ export function ProjectsView() {
 
       return matchesSearch && matchesTab;
     });
-  }, [projects, searchQuery, activeTab]);
+  }, [projects, searchQuery, activeTab, currentUser]);
 
   // Filter clients by search query
   const filteredClients = useMemo(() => {
@@ -120,6 +145,18 @@ export function ProjectsView() {
                   : filteredProjects.length}
               </Badge>
             </div>
+
+            {/* RBAC ROLE BANNER BADGE */}
+            {currentUser.role === "pm" ? (
+              <Badge className="flex items-center gap-1.5 rounded-none border-blue-500/40 bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-blue-400">
+                <ShieldAlert className="h-3.5 w-3.5" />
+                PM Mode: Showing Assigned Projects ({currentUser.name})
+              </Badge>
+            ) : (
+              <Badge className="rounded-none border-amber-500/40 bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-500">
+                Admin Mode: Full Access
+              </Badge>
+            )}
 
             <div className="bg-border hidden h-4 w-[1px] sm:block" />
 
@@ -231,13 +268,13 @@ export function ProjectsView() {
                 <th className="bg-secondary w-[20%] p-3.5 font-semibold">
                   Period
                 </th>
-                <th className="bg-secondary w-[22%] p-3.5 font-semibold">
+                <th className="bg-secondary w-[20%] p-3.5 font-semibold">
                   Manager
                 </th>
                 <th className="bg-secondary w-[13%] p-3.5 font-semibold">
                   Progress
                 </th>
-                <th className="bg-secondary w-[10%] p-3.5 pr-6 text-right font-semibold">
+                <th className="bg-secondary w-[12%] p-3.5 pr-6 text-right font-semibold">
                   Actions
                 </th>
               </tr>
@@ -280,9 +317,20 @@ export function ProjectsView() {
                             <div className="bg-secondary text-foreground border-border flex h-7 w-7 shrink-0 items-center justify-center border text-xs font-bold">
                               {project.name.charAt(0).toUpperCase()}
                             </div>
-                            <span className="text-foreground truncate text-xs font-semibold">
-                              {project.name}
-                            </span>
+                            <div className="flex flex-col truncate">
+                              <span className="text-foreground truncate text-xs font-semibold">
+                                {project.name}
+                              </span>
+                              {project.teamMembers &&
+                                project.teamMembers.length > 0 && (
+                                  <span className="text-muted-foreground truncate text-[10px]">
+                                    {project.teamMembers.length} members • TL:{" "}
+                                    {project.teamMembers.find(
+                                      (m) => m.isTechLead,
+                                    )?.name || "None"}
+                                  </span>
+                                )}
+                            </div>
                           </div>
                         </td>
 
@@ -333,6 +381,12 @@ export function ProjectsView() {
                         {/* Actions Column */}
                         <td className="py-3 pr-6 pl-3 text-right">
                           <div className="inline-flex items-center gap-1">
+                            {/* Manage Team & Tech Lead Button */}
+                            <ManageTeamDialog
+                              project={project}
+                              onUpdateTeam={handleUpdateTeam}
+                            />
+
                             <Button
                               variant="outline"
                               size="icon"
@@ -340,6 +394,7 @@ export function ProjectsView() {
                             >
                               <Pencil className="text-muted-foreground h-3 w-3" />
                             </Button>
+
                             <Button
                               variant="outline"
                               size="icon"
@@ -348,6 +403,7 @@ export function ProjectsView() {
                             >
                               <Trash2 className="h-3 w-3" />
                             </Button>
+
                             <Button
                               variant="outline"
                               size="icon"

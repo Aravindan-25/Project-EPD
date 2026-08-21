@@ -13,6 +13,16 @@ export const projectStageSchema = z.enum([
 ]);
 export type ProjectStage = z.infer<typeof projectStageSchema>;
 
+export const teamMemberSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, "Name is required"),
+  role: z.string().min(1, "Role is required"),
+  email: z.string().optional(),
+  isTechLead: z.boolean(),
+});
+
+export type TeamMember = z.infer<typeof teamMemberSchema>;
+
 export const createProjectFormSchema = z.object({
   name: z.string().min(2, "Project name must be at least 2 characters"),
   code: z.string().optional(),
@@ -29,6 +39,7 @@ export const createProjectFormSchema = z.object({
   clientName: z.string().optional(),
   contactPerson: z.string().optional(),
   deliveryHead: z.string().optional(),
+  teamMembers: z.array(teamMemberSchema).optional(),
 });
 
 export type CreateProjectFormValues = z.infer<typeof createProjectFormSchema>;
@@ -38,6 +49,58 @@ export const projectSchema = createProjectFormSchema.extend({
 });
 
 export type Project = z.infer<typeof projectSchema>;
+
+export interface UserRoleProfile {
+  id: string;
+  name: string;
+  code: string;
+  role: "admin" | "pm";
+  email: string;
+  avatar: string;
+}
+
+export const USER_PROFILES: UserRoleProfile[] = [
+  {
+    id: "usr-admin",
+    name: "Lead Engineer",
+    code: "ADMIN",
+    role: "admin",
+    email: "admin@project-epd.io",
+    avatar: "EP",
+  },
+  {
+    id: "usr-vikas",
+    name: "Vikas Singh",
+    code: "AILOITTE-45",
+    role: "pm",
+    email: "vikas.singh@ailoitte.com",
+    avatar: "VS",
+  },
+  {
+    id: "usr-sahara",
+    name: "Sahara Acharya",
+    code: "EMP39",
+    role: "pm",
+    email: "sahara.a@ailoitte.com",
+    avatar: "SA",
+  },
+  {
+    id: "usr-dehradun",
+    name: "Dehradun Kumar",
+    code: "EMP40",
+    role: "pm",
+    email: "dehradun.k@ailoitte.com",
+    avatar: "DK",
+  },
+  {
+    id: "usr-rahul",
+    name: "Rahul Yadav",
+    code: "AILOITTE-89",
+    role: "pm",
+    email: "rahul.yadav@ailoitte.com",
+    avatar: "RY",
+  },
+];
 
 export const SAMPLE_PROJECTS: Project[] = [
   {
@@ -52,6 +115,22 @@ export const SAMPLE_PROJECTS: Project[] = [
     managerCode: "AILOITTE-73",
     progress: 0,
     clientType: "client",
+    teamMembers: [
+      {
+        id: "tm-1",
+        name: "Amit Sharma",
+        role: "Senior Fullstack Engineer",
+        email: "amit@ailoitte.com",
+        isTechLead: true,
+      },
+      {
+        id: "tm-2",
+        name: "Pooja Verma",
+        role: "Frontend Developer",
+        email: "pooja@ailoitte.com",
+        isTechLead: false,
+      },
+    ],
   },
   {
     id: "PRJ-02",
@@ -65,6 +144,22 @@ export const SAMPLE_PROJECTS: Project[] = [
     managerCode: "AILOITTE-45",
     progress: 5,
     clientType: "client",
+    teamMembers: [
+      {
+        id: "tm-3",
+        name: "Rohan Gupta",
+        role: "Tech Lead",
+        email: "rohan@ailoitte.com",
+        isTechLead: true,
+      },
+      {
+        id: "tm-4",
+        name: "Sneha Patel",
+        role: "UI/UX Designer",
+        email: "sneha@ailoitte.com",
+        isTechLead: false,
+      },
+    ],
   },
   {
     id: "PRJ-03",
@@ -78,6 +173,15 @@ export const SAMPLE_PROJECTS: Project[] = [
     managerCode: "AILOITTE-45",
     progress: 2,
     clientType: "client",
+    teamMembers: [
+      {
+        id: "tm-5",
+        name: "Karan Johar",
+        role: "Embedded Systems Developer",
+        email: "karan@ailoitte.com",
+        isTechLead: true,
+      },
+    ],
   },
   {
     id: "PRJ-04",

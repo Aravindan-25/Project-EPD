@@ -10,8 +10,14 @@ export default function Home() {
   return (
     <SidebarProvider>
       <div className="bg-background text-foreground flex min-h-screen w-full transition-colors duration-200">
-        {/* Shadcn UI Sidebar */}
-        <AppSidebar />
+        {/* Shadcn UI Sidebar wrapped in Suspense for nuqs query state */}
+        <Suspense
+          fallback={
+            <div className="bg-sidebar border-sidebar-border w-16 border-r" />
+          }
+        >
+          <AppSidebar />
+        </Suspense>
 
         {/* Main Content Workspace Inset */}
         <SidebarInset className="bg-background flex flex-1 flex-col">
