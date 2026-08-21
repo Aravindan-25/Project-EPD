@@ -74,10 +74,10 @@ export function ProjectsView() {
 
   return (
     <div className="bg-background text-foreground flex h-screen flex-col overflow-hidden">
-      {/* FIXED TOP HEADER SECTION */}
-      <div className="bg-background border-border shrink-0 border-b">
+      {/* SOLID OPAQUE FIXED TOP HEADER SECTION */}
+      <div className="border-border bg-background relative z-20 shrink-0 border-b shadow-sm">
         {/* Top Controls Bar */}
-        <div className="bg-card/40 border-border/60 flex flex-col gap-3 border-b p-4 md:flex-row md:items-center md:justify-between">
+        <div className="border-border bg-card flex flex-col gap-3 border-b p-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <h1 className="text-foreground text-lg font-bold tracking-tight">
@@ -127,7 +127,7 @@ export function ProjectsView() {
                 placeholder="Find projects here"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value || null)}
-                className="bg-secondary/30 border-border focus-visible:ring-primary h-8 rounded-none pr-7 pl-8 text-xs"
+                className="bg-secondary/50 border-border focus-visible:ring-primary h-8 rounded-none pr-7 pl-8 text-xs"
               />
               {searchQuery && (
                 <button
@@ -151,8 +151,8 @@ export function ProjectsView() {
           </div>
         </div>
 
-        {/* Fixed Tabs Navigation Header */}
-        <div className="bg-card/20 border-border border-b px-4 pt-2">
+        {/* Solid Tabs Navigation Header */}
+        <div className="bg-card px-4 pt-2">
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
@@ -184,17 +184,17 @@ export function ProjectsView() {
 
       {/* SCROLLABLE TABLE AREA ONLY */}
       <div className="flex-1 overflow-auto p-4">
-        <div className="border-border/80 bg-card border shadow-sm">
+        <div className="border-border bg-card border shadow-sm">
           <table className="w-full border-collapse text-left text-xs">
-            {/* Sticky Table Column Headers */}
-            <thead className="border-border bg-secondary text-muted-foreground sticky top-0 z-10 border-b font-medium tracking-wider uppercase shadow-sm">
+            {/* Sticky Table Column Headers with 100% Solid Background */}
+            <thead className="border-border bg-secondary text-muted-foreground sticky top-0 z-10 border-b font-medium tracking-wider uppercase opacity-100 shadow-sm">
               <tr>
-                <th className="w-2/5 p-3">Name</th>
-                <th className="p-3">Stage</th>
-                <th className="p-3">Period</th>
-                <th className="p-3">Manager</th>
-                <th className="w-48 p-3">Progress</th>
-                <th className="p-3 text-right">Actions</th>
+                <th className="bg-secondary w-2/5 p-3">Name</th>
+                <th className="bg-secondary p-3">Stage</th>
+                <th className="bg-secondary p-3">Period</th>
+                <th className="bg-secondary p-3">Manager</th>
+                <th className="bg-secondary w-48 p-3">Progress</th>
+                <th className="bg-secondary p-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-border/50 divide-y">
@@ -208,7 +208,7 @@ export function ProjectsView() {
                 return (
                   <tr key={group.name} className="contents">
                     {/* Stage Group Section Title Header */}
-                    <tr className="bg-secondary/40 border-border/80 border-t border-b">
+                    <tr className="bg-secondary/60 border-border border-t border-b">
                       <td
                         colSpan={6}
                         className="text-foreground px-3 py-2.5 text-xs font-semibold"
@@ -227,7 +227,7 @@ export function ProjectsView() {
                     {groupProjects.map((project) => (
                       <tr
                         key={project.id}
-                        className="hover:bg-secondary/30 border-border/40 border-b transition-colors"
+                        className="hover:bg-secondary/40 border-border/40 border-b transition-colors"
                       >
                         {/* Name Column */}
                         <td className="px-3 py-3">
@@ -258,7 +258,7 @@ export function ProjectsView() {
 
                         {/* Manager Column */}
                         <td className="px-3 py-3">
-                          <div className="border-border bg-secondary/40 text-foreground inline-flex items-center gap-1.5 border px-2 py-1 text-xs">
+                          <div className="border-border bg-secondary/50 text-foreground inline-flex items-center gap-1.5 border px-2 py-1 text-xs">
                             <div className="bg-primary/20 text-primary flex h-5 w-5 items-center justify-center text-[10px] font-bold">
                               {project.managerName.charAt(0)}
                             </div>
@@ -323,7 +323,7 @@ export function ProjectsView() {
       </div>
 
       {/* Floating Chat Widget Button (Bottom Right) */}
-      <button className="bg-primary hover:bg-primary/90 fixed right-6 bottom-6 flex h-12 w-12 items-center justify-center text-white shadow-xl transition-all hover:scale-105 focus:outline-none">
+      <button className="bg-primary hover:bg-primary/90 fixed right-6 bottom-6 z-30 flex h-12 w-12 items-center justify-center text-white shadow-xl transition-all hover:scale-105 focus:outline-none">
         <MessageSquare className="h-6 w-6" />
       </button>
     </div>
