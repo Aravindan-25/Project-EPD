@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Loader2, Upload, RotateCw, X } from "lucide-react";
+import { Plus, Loader2, Upload, X } from "lucide-react";
 import {
   createClientFormSchema,
   type CreateClientFormValues,
@@ -77,14 +77,6 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
     name: "contactPersons",
   });
 
-  const watchContactEmail = watch("contactPersons.0.email");
-
-  const handleCopyEmailToLogin = () => {
-    if (watchContactEmail) {
-      setValue("loginEmail", watchContactEmail);
-    }
-  };
-
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -148,8 +140,7 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
             Add New Client
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-xs">
-            Fill in the client credentials, portal access, and contact details
-            below.
+            Fill in the client credentials and contact details below.
           </DialogDescription>
         </DialogHeader>
 
@@ -341,68 +332,6 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
               {...register("address")}
               className="bg-secondary/40 border-border text-foreground focus-visible:ring-primary w-full rounded-none border p-2 text-xs focus:outline-none"
             />
-          </div>
-
-          {/* PORTAL ACCESS CARD SECTION */}
-          <div className="border-primary/20 bg-primary/5 space-y-3 border p-4">
-            <div>
-              <h4 className="text-primary text-xs font-bold tracking-wide uppercase">
-                PORTAL ACCESS
-              </h4>
-              <p className="text-muted-foreground mt-0.5 text-[11px] leading-tight">
-                These credentials will be sent to the client so they can log in
-                and view their assigned projects and sprints.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              {/* Login Email */}
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="loginEmail"
-                  className="text-muted-foreground text-xs font-medium"
-                >
-                  Login email
-                </Label>
-                <Input
-                  id="loginEmail"
-                  type="email"
-                  placeholder="client@company.com"
-                  {...register("loginEmail")}
-                  className="bg-background border-border h-8 w-full rounded-none text-xs"
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleCopyEmailToLogin}
-                  className="border-border text-primary bg-primary/10 hover:bg-primary/20 h-6 gap-1 rounded-none border px-2 text-[10px]"
-                >
-                  <RotateCw className="h-2.5 w-2.5" /> Same as contact email
-                </Button>
-              </div>
-
-              {/* Login Password */}
-              <div className="space-y-1.5">
-                <Label className="text-muted-foreground text-xs font-medium">
-                  Login password
-                </Label>
-                <div className="relative">
-                  <Input
-                    readOnly
-                    value="Auto-generated"
-                    className="bg-background border-border text-muted-foreground h-8 w-full rounded-none pr-7 text-xs"
-                  />
-                  <RotateCw className="text-muted-foreground absolute top-2 right-2 h-3.5 w-3.5" />
-                </div>
-                <div className="flex items-center gap-1.5 pt-0.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  <span className="text-[10px] font-medium text-emerald-600">
-                    Will be emailed to client on create
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* CONTACT PERSON SECTION */}
