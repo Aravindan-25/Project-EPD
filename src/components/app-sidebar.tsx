@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { FolderKanban, Sparkles, Layers, LogOut } from "lucide-react";
+import { FolderKanban, Layers, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -82,19 +82,6 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {/* Tech Stack Indicator Box */}
-        <div className="border-border bg-card/60 mx-2 mt-6 rounded-xl border p-3 shadow-sm">
-          <div className="text-primary flex items-center gap-1.5 text-xs font-semibold">
-            <Sparkles className="h-3.5 w-3.5 text-amber-500" /> Active Color
-            Scheme
-          </div>
-          <p className="text-muted-foreground mt-1 text-[11px]">
-            Accent: <code className="text-primary font-mono">#3D63DD</code> |
-            Gray:{" "}
-            <code className="text-muted-foreground font-mono">#8B8D98</code>
-          </p>
-        </div>
       </SidebarContent>
 
       {/* User Profile Footer */}
