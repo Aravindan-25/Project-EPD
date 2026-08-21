@@ -54,7 +54,7 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
       managerName: "Vikas Singh",
       managerCode: "AILOITTE-45",
       progress: 0,
-      clientType: "client",
+      clientType: "in_house",
     },
   });
 
@@ -112,6 +112,27 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">Project Type</Label>
+              <Select
+                value={watch("clientType")}
+                onValueChange={(val) =>
+                  setValue(
+                    "clientType",
+                    val as CreateProjectFormValues["clientType"],
+                  )
+                }
+              >
+                <SelectTrigger className="bg-secondary/40 border-border text-xs">
+                  <SelectValue placeholder="Project Type" />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border">
+                  <SelectItem value="client">Client Project</SelectItem>
+                  <SelectItem value="in_house">In House Project</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
               <Label className="text-xs font-semibold">Stage Group</Label>
               <Select
                 value={watch("stageGroup")}
@@ -135,7 +156,9 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="progress" className="text-xs font-semibold">
                 Progress (%)
@@ -148,9 +171,7 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
                 className="bg-secondary/40 border-border text-sm"
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="periodStart" className="text-xs font-semibold">
                 Start Period
@@ -162,6 +183,9 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
                 className="bg-secondary/40 border-border text-sm"
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="periodEnd" className="text-xs font-semibold">
                 End Period
@@ -173,9 +197,7 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
                 className="bg-secondary/40 border-border text-sm"
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="managerName" className="text-xs font-semibold">
                 Manager Name
@@ -184,17 +206,6 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
                 id="managerName"
                 placeholder="Vikas Singh"
                 {...register("managerName")}
-                className="bg-secondary/40 border-border text-sm"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="managerCode" className="text-xs font-semibold">
-                Manager Tag
-              </Label>
-              <Input
-                id="managerCode"
-                placeholder="AILOITTE-45"
-                {...register("managerCode")}
                 className="bg-secondary/40 border-border text-sm"
               />
             </div>
