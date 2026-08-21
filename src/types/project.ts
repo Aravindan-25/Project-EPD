@@ -9,32 +9,37 @@ export const projectStageSchema = z.enum([
 ]);
 export type ProjectStage = z.infer<typeof projectStageSchema>;
 
-export const projectSchema = z.object({
-  id: z.string(),
+export const createProjectFormSchema = z.object({
   name: z.string().min(2, "Project name must be at least 2 characters"),
+  code: z.string().optional(),
   stageGroup: projectStageSchema,
   stage: z.string(),
-  periodStart: z.string(),
-  periodEnd: z.string(),
-  managerName: z.string(),
+  periodStart: z.string().min(1, "Start Date is required"),
+  periodEnd: z.string().min(1, "End Date is required"),
+  managerName: z.string().min(1, "Project Manager is required"),
   managerCode: z.string(),
   managerAvatar: z.string().optional(),
   progress: z.number().min(0).max(100),
   clientType: z.enum(["client", "in_house"]),
-});
-
-export type Project = z.infer<typeof projectSchema>;
-
-export const createProjectFormSchema = projectSchema.omit({
-  id: true,
+  description: z.string().optional(),
+  clientName: z.string().optional(),
+  contactPerson: z.string().optional(),
+  deliveryHead: z.string().optional(),
 });
 
 export type CreateProjectFormValues = z.infer<typeof createProjectFormSchema>;
+
+export const projectSchema = createProjectFormSchema.extend({
+  id: z.string(),
+});
+
+export type Project = z.infer<typeof projectSchema>;
 
 export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-01",
     name: "Appofy",
+    code: "APP-01",
     stageGroup: "New",
     stage: "New",
     periodStart: "15 Apr 25",
@@ -47,6 +52,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-02",
     name: "pclient 3",
+    code: "PCL-03",
     stageGroup: "New",
     stage: "New",
     periodStart: "01 Feb 25",
@@ -59,6 +65,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-03",
     name: "Smart Watch",
+    code: "SMW-01",
     stageGroup: "New",
     stage: "New",
     periodStart: "20 Feb 25",
@@ -71,6 +78,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-04",
     name: "Testing filter for user filter",
+    code: "TST-01",
     stageGroup: "In Discovery",
     stage: "New",
     periodStart: "18 Feb 25",
@@ -83,6 +91,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-05",
     name: "Trigger project 2",
+    code: "TRG-02",
     stageGroup: "In Discovery",
     stage: "New",
     periodStart: "08 Jan 25",
@@ -95,6 +104,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-06",
     name: "Trigger Project Notification",
+    code: "TRG-NOTI",
     stageGroup: "In Discovery",
     stage: "New",
     periodStart: "01 Feb 25",
@@ -107,6 +117,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-07",
     name: "WorkSync",
+    code: "WSC-01",
     stageGroup: "Sprint Planning",
     stage: "New",
     periodStart: "24 Apr 25",
@@ -119,6 +130,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-08",
     name: "Pro1",
+    code: "PRO-01",
     stageGroup: "Sprint Planning",
     stage: "New",
     periodStart: "24 Mar 25",
@@ -131,6 +143,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-09",
     name: "Shopify 12",
+    code: "SHP-12",
     stageGroup: "Sprint Planning",
     stage: "New",
     periodStart: "21 Feb 25",
@@ -143,6 +156,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-10",
     name: "client 2",
+    code: "CLI-02",
     stageGroup: "Sprint Planning",
     stage: "New",
     periodStart: "20 Jan 25",
@@ -155,6 +169,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-11",
     name: "Games10",
+    code: "GMS-10",
     stageGroup: "In Development",
     stage: "New",
     periodStart: "12 Feb 25",
@@ -168,6 +183,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-IH-01",
     name: "Internal ERP Engine",
+    code: "ERP-ENG",
     stageGroup: "New",
     stage: "New",
     periodStart: "01 May 25",
@@ -180,6 +196,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-IH-02",
     name: "Design System & Component Library",
+    code: "DS-LIB",
     stageGroup: "In Discovery",
     stage: "New",
     periodStart: "10 Mar 25",
@@ -192,6 +209,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-IH-03",
     name: "DevOps Pipeline Automation",
+    code: "DVP-AUTO",
     stageGroup: "Sprint Planning",
     stage: "New",
     periodStart: "01 Feb 25",
@@ -204,6 +222,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-IH-04",
     name: "AI Analytics Dashboard",
+    code: "AI-DASH",
     stageGroup: "In Development",
     stage: "New",
     periodStart: "15 Jan 25",
@@ -216,6 +235,7 @@ export const SAMPLE_PROJECTS: Project[] = [
   {
     id: "PRJ-IH-05",
     name: "Authentication & SSO Gateway",
+    code: "SSO-GTW",
     stageGroup: "In Development",
     stage: "New",
     periodStart: "01 Jan 25",
