@@ -121,6 +121,31 @@
   --radius-sm: 0rem;
 }
 
+/* CUSTOM GLOBAL SCROLLBAR STYLING */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--secondary) / 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.35);
+  border-radius: 0rem;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.35)
+    hsl(var(--secondary) / 0.5);
+}
+
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));

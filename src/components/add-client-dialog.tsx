@@ -207,7 +207,7 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
                 id="name"
                 placeholder="Enter Clients Name"
                 {...register("name")}
-                className="bg-secondary/40 border-border h-9 rounded-none text-xs"
+                className="bg-secondary/40 border-border h-9 w-full rounded-none text-xs"
               />
               {errors.name && (
                 <p className="text-[11px] font-medium text-red-500">
@@ -228,7 +228,7 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
                 id="code"
                 placeholder="Enter Clients ID"
                 {...register("code")}
-                className="bg-secondary/40 border-border h-9 rounded-none text-xs"
+                className="bg-secondary/40 border-border h-9 w-full rounded-none text-xs"
               />
               {errors.code && (
                 <p className="text-[11px] font-medium text-red-500">
@@ -237,8 +237,8 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
               )}
             </div>
 
-            {/* Industry */}
-            <div className="space-y-1">
+            {/* Industry (FULL WIDTH) */}
+            <div className="col-span-2 space-y-1">
               <Label className="text-foreground text-xs font-semibold">
                 Industry
               </Label>
@@ -246,7 +246,7 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
                 value={watch("industry")}
                 onValueChange={(val) => setValue("industry", val)}
               >
-                <SelectTrigger className="bg-secondary/40 border-border h-9 rounded-none text-xs">
+                <SelectTrigger className="bg-secondary/40 border-border h-9 w-full rounded-none text-xs">
                   <SelectValue placeholder="Select Industry" />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border rounded-none">
@@ -265,8 +265,8 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
               </Select>
             </div>
 
-            {/* Account Manager */}
-            <div className="space-y-1">
+            {/* Account Manager (FULL WIDTH) */}
+            <div className="col-span-2 space-y-1">
               <Label className="text-foreground text-xs font-semibold">
                 Account Manager
               </Label>
@@ -286,7 +286,7 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
                     setValue("managerCode", "AILOITTE-45");
                 }}
               >
-                <SelectTrigger className="bg-secondary/40 border-border h-9 rounded-none text-xs">
+                <SelectTrigger className="bg-secondary/40 border-border h-9 w-full rounded-none text-xs">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border rounded-none">
@@ -322,7 +322,7 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
               id="gstNumber"
               placeholder="Enter GSTIN"
               {...register("gstNumber")}
-              className="bg-secondary/40 border-border h-9 rounded-none font-mono text-xs"
+              className="bg-secondary/40 border-border h-9 w-full rounded-none font-mono text-xs"
             />
           </div>
 
@@ -369,7 +369,7 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
                   type="email"
                   placeholder="client@company.com"
                   {...register("loginEmail")}
-                  className="bg-background border-border h-8 rounded-none text-xs"
+                  className="bg-background border-border h-8 w-full rounded-none text-xs"
                 />
                 <Button
                   type="button"
@@ -391,7 +391,7 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
                   <Input
                     readOnly
                     value="Auto-generated"
-                    className="bg-background border-border text-muted-foreground h-8 rounded-none pr-7 text-xs"
+                    className="bg-background border-border text-muted-foreground h-8 w-full rounded-none pr-7 text-xs"
                   />
                   <RotateCw className="text-muted-foreground absolute top-2 right-2 h-3.5 w-3.5" />
                 </div>
@@ -442,7 +442,7 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
                     <Input
                       placeholder="Enter Contact Person Name"
                       {...register(`contactPersons.${index}.name` as const)}
-                      className="bg-secondary/40 border-border h-8 rounded-none text-xs"
+                      className="bg-secondary/40 border-border h-8 w-full rounded-none text-xs"
                     />
                   </div>
 
@@ -456,7 +456,7 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
                       {...register(
                         `contactPersons.${index}.designation` as const,
                       )}
-                      className="bg-secondary/40 border-border h-8 rounded-none text-xs"
+                      className="bg-secondary/40 border-border h-8 w-full rounded-none text-xs"
                     />
                   </div>
 
@@ -469,7 +469,7 @@ export function AddClientDialog({ onAddClient }: AddClientDialogProps) {
                       type="email"
                       placeholder="Enter Contact Person Email"
                       {...register(`contactPersons.${index}.email` as const)}
-                      className="bg-secondary/40 border-border h-8 rounded-none text-xs"
+                      className="bg-secondary/40 border-border h-8 w-full rounded-none text-xs"
                     />
                   </div>
 
