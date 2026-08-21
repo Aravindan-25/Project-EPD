@@ -63,7 +63,7 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
 
     const newProject: Project = {
       ...data,
-      id: `PRJ-${Math.floor(10 + Math.random() * 90)}`,
+      id: `PRJ-${data.name.slice(0, 4).toUpperCase()}`,
     };
 
     onAddProject(newProject);
