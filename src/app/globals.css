@@ -2,33 +2,44 @@
 
 @layer base {
   :root {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
+    /* Radix custom dark scheme based on #1E1F24 */
+    --background: 230 9% 13%; /* #1E1F24 */
+    --foreground: 240 5% 93%; /* #EEEEF0 */
 
-    --card: 224 71% 7%;
-    --card-foreground: 213 31% 91%;
+    --card: 230 9% 16%; /* #25262C */
+    --card-foreground: 240 5% 93%;
 
-    --popover: 224 71% 7%;
-    --popover-foreground: 213 31% 91%;
+    --popover: 230 9% 16%;
+    --popover-foreground: 240 5% 93%;
 
-    --primary: 210 100% 52%;
+    --primary: 252 62% 63%; /* Radix Iris/Violet #7C66DC */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 230 9% 20%; /* #2E3038 */
+    --secondary-foreground: 240 5% 93%;
 
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
+    --muted: 230 9% 20%;
+    --muted-foreground: 240 4% 64%; /* #9E9EA5 */
 
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
+    --accent: 230 10% 24%; /* #383A44 */
+    --accent-foreground: 240 5% 93%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 240 5% 98%;
 
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 216 12.2% 83.9%;
+    --border: 230 9% 22%; /* #2C2E36 */
+    --input: 230 9% 22%;
+    --ring: 252 62% 63%;
+
+    /* Sidebar theme tokens matching Radix #1E1F24 */
+    --sidebar-background: 230 10% 9.5%; /* #16171B */
+    --sidebar-foreground: 240 5% 90%;
+    --sidebar-primary: 252 62% 63%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 230 9% 18%; /* #282930 */
+    --sidebar-accent-foreground: 240 5% 95%;
+    --sidebar-border: 230 9% 18%;
+    --sidebar-ring: 252 62% 63%;
 
     --radius: 0.75rem;
   }
@@ -54,13 +65,23 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 }
 
 body {
-  background-color: hsl(var(--background));
+  background-color: #1e1f24;
   color: hsl(var(--foreground));
   font-feature-settings:
     "rlig" 1,
