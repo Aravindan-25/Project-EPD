@@ -212,7 +212,13 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
                 <SelectItem value="In Discovery">In Discovery</SelectItem>
                 <SelectItem value="Sprint Planning">Sprint Planning</SelectItem>
                 <SelectItem value="In Development">In Development</SelectItem>
+                <SelectItem value="In UAT">In UAT</SelectItem>
+                <SelectItem value="Released & In Support">
+                  Released & In Support
+                </SelectItem>
+                <SelectItem value="In Maintenance">In Maintenance</SelectItem>
                 <SelectItem value="Completed">Completed</SelectItem>
+                <SelectItem value="Closed">Closed</SelectItem>
               </SelectContent>
             </Select>
           </div>

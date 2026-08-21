@@ -31,6 +31,11 @@ const STAGE_GROUPS: { name: ProjectStage; dotColor: string }[] = [
   { name: "In Discovery", dotColor: "bg-emerald-400" },
   { name: "Sprint Planning", dotColor: "bg-slate-400" },
   { name: "In Development", dotColor: "bg-[#7C66DC]" },
+  { name: "In UAT", dotColor: "bg-cyan-400" },
+  { name: "Released & In Support", dotColor: "bg-blue-500" },
+  { name: "In Maintenance", dotColor: "bg-indigo-400" },
+  { name: "Completed", dotColor: "bg-green-500" },
+  { name: "Closed", dotColor: "bg-gray-500" },
 ];
 
 export function ProjectsView() {
