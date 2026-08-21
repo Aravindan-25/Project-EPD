@@ -10,7 +10,6 @@ import {
   Pencil,
   Trash2,
   ExternalLink,
-  MessageSquare,
   ChevronDown,
 } from "lucide-react";
 import {
@@ -182,10 +181,10 @@ export function ProjectsView() {
         </div>
       </div>
 
-      {/* SCROLLABLE TABLE AREA - EVEN COLUMN SPACING & LEFT/RIGHT INSIDE PADDING */}
+      {/* SCROLLABLE TABLE AREA */}
       <div className="flex-1 overflow-auto">
         <table className="w-full table-fixed border-collapse text-left text-xs">
-          {/* Sticky Table Column Headers - Even Columns & Padding */}
+          {/* Sticky Table Column Headers */}
           <thead className="border-border bg-secondary text-muted-foreground sticky top-0 z-10 border-b font-medium tracking-wider uppercase opacity-100 shadow-sm">
             <tr>
               <th className="bg-secondary w-[20%] p-3.5 pl-6 font-semibold">
@@ -331,11 +330,6 @@ export function ProjectsView() {
           </tbody>
         </table>
       </div>
-
-      {/* Floating Chat Widget Button (Bottom Right) */}
-      <button className="bg-primary hover:bg-primary/90 fixed right-6 bottom-6 z-30 flex h-12 w-12 items-center justify-center text-white shadow-xl transition-all hover:scale-105 focus:outline-none">
-        <MessageSquare className="h-6 w-6" />
-      </button>
     </div>
   );
 }
