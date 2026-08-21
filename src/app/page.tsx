@@ -135,7 +135,7 @@ export default function Home() {
                 </span>
                 <span className="text-muted-foreground text-sm">\</span>
                 <span className="text-foreground text-sm font-semibold">
-                  Dashboard
+                  Projects
                 </span>
               </div>
             </div>

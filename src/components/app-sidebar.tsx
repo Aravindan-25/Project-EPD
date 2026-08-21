@@ -1,19 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  LayoutDashboard,
-  Table as TableIcon,
-  FolderKanban,
-  BarChart3,
-  Settings,
-  Users,
-  ShieldAlert,
-  Sparkles,
-  Layers,
-  ChevronRight,
-  LogOut,
-} from "lucide-react";
+import { FolderKanban, Sparkles, Layers, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -29,39 +17,12 @@ import {
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 
-const mainNavItems = [
-  {
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    isActive: true,
-  },
-  {
-    title: "Task Directory Engine",
-    icon: TableIcon,
-    badge: "Nuqs Sync",
-  },
+const projectNavItems = [
   {
     title: "Projects",
     icon: FolderKanban,
-  },
-  {
-    title: "Analytics",
-    icon: BarChart3,
-  },
-];
-
-const managementNavItems = [
-  {
-    title: "Team Members",
-    icon: Users,
-  },
-  {
-    title: "Security & Audit",
-    icon: ShieldAlert,
-  },
-  {
-    title: "Settings",
-    icon: Settings,
+    isActive: true,
+    badge: "Active",
   },
 ];
 
@@ -92,14 +53,14 @@ export function AppSidebar() {
 
       {/* Sidebar Content */}
       <SidebarContent className="px-2 py-3">
-        {/* Main Navigation */}
+        {/* Projects Menu Group */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-muted-foreground px-3 text-[11px] font-semibold tracking-wider uppercase">
-            Platform Overview
+            Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNavItems.map((item) => (
+              {projectNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     isActive={item.isActive}
@@ -109,38 +70,12 @@ export function AppSidebar() {
                       <item.icon className="text-primary h-4 w-4" />
                       <span className="text-sm font-medium">{item.title}</span>
                     </div>
-                    {item.badge ? (
-                      <Badge
-                        variant="outline"
-                        className="border-primary/40 bg-primary/10 text-primary text-[10px]"
-                      >
-                        {item.badge}
-                      </Badge>
-                    ) : (
-                      <ChevronRight className="text-muted-foreground h-3.5 w-3.5 opacity-60" />
-                    )}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Management Group */}
-        <SidebarGroup className="mt-4">
-          <SidebarGroupLabel className="text-muted-foreground px-3 text-[11px] font-semibold tracking-wider uppercase">
-            Management
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {managementNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton className="hover:bg-sidebar-accent text-sidebar-foreground w-full justify-between transition-colors">
-                    <div className="flex items-center gap-2.5">
-                      <item.icon className="text-muted-foreground h-4 w-4" />
-                      <span className="text-sm font-medium">{item.title}</span>
-                    </div>
-                    <ChevronRight className="text-muted-foreground h-3.5 w-3.5 opacity-60" />
+                    <Badge
+                      variant="outline"
+                      className="border-primary/40 bg-primary/10 text-primary text-[10px]"
+                    >
+                      {item.badge}
+                    </Badge>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -166,7 +101,7 @@ export function AppSidebar() {
       <SidebarFooter className="border-sidebar-border border-t p-3">
         <div className="hover:bg-sidebar-accent flex items-center justify-between rounded-lg p-2 transition-colors">
           <div className="flex items-center gap-3">
-            <div className="bg-primary/30 text-primary-foreground border-primary/40 flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold">
+            <div className="border-primary/40 bg-primary/30 text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold">
               EP
             </div>
             <div className="flex flex-col">
