@@ -77,7 +77,7 @@ export function ProjectsView() {
       {/* SOLID OPAQUE FIXED TOP HEADER SECTION */}
       <div className="border-border bg-background relative z-20 shrink-0 border-b shadow-sm">
         {/* Top Controls Bar */}
-        <div className="border-border bg-card flex flex-col gap-3 border-b p-4 md:flex-row md:items-center md:justify-between">
+        <div className="border-border bg-card flex flex-col gap-3 border-b px-6 py-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <h1 className="text-foreground text-lg font-bold tracking-tight">
@@ -151,8 +151,8 @@ export function ProjectsView() {
           </div>
         </div>
 
-        {/* Project Types Tabs Header (Attaches directly to table below) */}
-        <div className="bg-card px-4 pt-2">
+        {/* Project Types Tabs Header */}
+        <div className="bg-card px-6 pt-2">
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
@@ -182,18 +182,30 @@ export function ProjectsView() {
         </div>
       </div>
 
-      {/* SCROLLABLE TABLE AREA - DIRECTLY ATTACHED TO TABS */}
+      {/* SCROLLABLE TABLE AREA - EVEN COLUMN SPACING & LEFT/RIGHT INSIDE PADDING */}
       <div className="flex-1 overflow-auto">
-        <table className="w-full border-collapse text-left text-xs">
-          {/* Sticky Table Column Headers - Seamless Attachment */}
+        <table className="w-full table-fixed border-collapse text-left text-xs">
+          {/* Sticky Table Column Headers - Even Columns & Padding */}
           <thead className="border-border bg-secondary text-muted-foreground sticky top-0 z-10 border-b font-medium tracking-wider uppercase opacity-100 shadow-sm">
             <tr>
-              <th className="bg-secondary w-2/5 p-3">Name</th>
-              <th className="bg-secondary p-3">Stage</th>
-              <th className="bg-secondary p-3">Period</th>
-              <th className="bg-secondary p-3">Manager</th>
-              <th className="bg-secondary w-48 p-3">Progress</th>
-              <th className="bg-secondary p-3 text-right">Actions</th>
+              <th className="bg-secondary w-[20%] p-3.5 pl-6 font-semibold">
+                Name
+              </th>
+              <th className="bg-secondary w-[15%] p-3.5 font-semibold">
+                Stage
+              </th>
+              <th className="bg-secondary w-[20%] p-3.5 font-semibold">
+                Period
+              </th>
+              <th className="bg-secondary w-[22%] p-3.5 font-semibold">
+                Manager
+              </th>
+              <th className="bg-secondary w-[13%] p-3.5 font-semibold">
+                Progress
+              </th>
+              <th className="bg-secondary w-[10%] p-3.5 pr-6 text-right font-semibold">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-border/50 bg-card divide-y">
@@ -210,7 +222,7 @@ export function ProjectsView() {
                   <tr className="bg-secondary/60 border-border border-t border-b">
                     <td
                       colSpan={6}
-                      className="text-foreground px-3 py-2.5 text-xs font-semibold"
+                      className="text-foreground py-2.5 pr-6 pl-6 text-xs font-semibold"
                     >
                       <div className="flex items-center gap-2">
                         <span className={`h-2.5 w-2.5 ${group.dotColor}`} />
@@ -229,12 +241,12 @@ export function ProjectsView() {
                       className="hover:bg-secondary/40 border-border/40 border-b transition-colors"
                     >
                       {/* Name Column */}
-                      <td className="px-3 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="bg-secondary text-foreground border-border flex h-7 w-7 items-center justify-center border text-xs font-bold">
+                      <td className="py-3 pr-3 pl-6">
+                        <div className="flex items-center gap-3 truncate">
+                          <div className="bg-secondary text-foreground border-border flex h-7 w-7 shrink-0 items-center justify-center border text-xs font-bold">
                             {project.name.charAt(0).toUpperCase()}
                           </div>
-                          <span className="text-foreground text-xs font-semibold">
+                          <span className="text-foreground truncate text-xs font-semibold">
                             {project.name}
                           </span>
                         </div>
@@ -251,23 +263,23 @@ export function ProjectsView() {
                       </td>
 
                       {/* Period Column */}
-                      <td className="text-muted-foreground px-3 py-3 font-mono text-xs">
+                      <td className="text-muted-foreground truncate px-3 py-3 font-mono text-xs">
                         {project.periodStart} - {project.periodEnd}
                       </td>
 
                       {/* Manager Column */}
                       <td className="px-3 py-3">
-                        <div className="border-border bg-secondary/50 text-foreground inline-flex items-center gap-1.5 border px-2 py-1 text-xs">
-                          <div className="bg-primary/20 text-primary flex h-5 w-5 items-center justify-center text-[10px] font-bold">
+                        <div className="border-border bg-secondary/50 text-foreground inline-flex max-w-full items-center gap-1.5 truncate border px-2 py-1 text-xs">
+                          <div className="bg-primary/20 text-primary flex h-5 w-5 shrink-0 items-center justify-center text-[10px] font-bold">
                             {project.managerName.charAt(0)}
                           </div>
-                          <span className="font-medium">
+                          <span className="truncate font-medium">
                             {project.managerName}
                           </span>
-                          <span className="text-muted-foreground text-[10px]">
+                          <span className="text-muted-foreground shrink-0 text-[10px]">
                             ({project.managerCode})
                           </span>
-                          <ChevronDown className="text-muted-foreground ml-1 h-3 w-3" />
+                          <ChevronDown className="text-muted-foreground ml-1 h-3 w-3 shrink-0" />
                         </div>
                       </td>
 
@@ -278,14 +290,14 @@ export function ProjectsView() {
                             value={project.progress}
                             className="bg-secondary h-1.5 flex-1 rounded-none"
                           />
-                          <span className="text-muted-foreground w-8 text-right font-mono text-[11px] font-medium">
+                          <span className="text-muted-foreground w-8 shrink-0 text-right font-mono text-[11px] font-medium">
                             {project.progress}%
                           </span>
                         </div>
                       </td>
 
                       {/* Actions Column */}
-                      <td className="px-3 py-3 text-right">
+                      <td className="py-3 pr-6 pl-3 text-right">
                         <div className="inline-flex items-center gap-1">
                           <Button
                             variant="outline"
