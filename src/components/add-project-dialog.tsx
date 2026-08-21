@@ -76,7 +76,7 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
       <DialogTrigger asChild>
         <Button
           size="sm"
-          className="bg-primary hover:bg-primary/90 font-medium text-white shadow"
+          className="bg-primary hover:bg-primary/90 rounded-none font-medium text-white shadow"
         >
           <Plus className="mr-1.5 h-3.5 w-3.5" />
           Add Project

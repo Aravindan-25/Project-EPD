@@ -40,7 +40,7 @@
     --sidebar-border: 231 6% 88%;
     --sidebar-ring: 226 71% 55%;
 
-    --radius: 0.75rem;
+    --radius: 0rem; /* No rounded corners */
   }
 
   .dark {
@@ -81,6 +81,8 @@
     --sidebar-accent-foreground: 240 5% 95%;
     --sidebar-border: 230 9% 18%;
     --sidebar-ring: 226 71% 55%;
+
+    --radius: 0rem; /* No rounded corners */
   }
 }
 
@@ -114,9 +116,9 @@
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-ring: hsl(var(--sidebar-ring));
 
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-lg: 0rem;
+  --radius-md: 0rem;
+  --radius-sm: 0rem;
 }
 
 body {

@@ -73,114 +73,122 @@ export function ProjectsView() {
   }, [projects, searchQuery, activeTab]);
 
   return (
-    <div className="bg-background text-foreground relative min-h-screen pb-20">
-      {/* Top Header Controls Bar */}
-      <div className="border-border bg-card/40 flex flex-col gap-3 border-b p-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <h1 className="text-foreground text-lg font-bold tracking-tight">
-              Manage Project
-            </h1>
-            <Badge
-              variant="secondary"
-              className="px-2 py-0.5 text-xs font-semibold"
-            >
-              2
-            </Badge>
+    <div className="bg-background text-foreground flex h-screen flex-col overflow-hidden">
+      {/* FIXED TOP HEADER SECTION */}
+      <div className="bg-background border-border shrink-0 border-b">
+        {/* Top Controls Bar */}
+        <div className="bg-card/40 border-border/60 flex flex-col gap-3 border-b p-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <h1 className="text-foreground text-lg font-bold tracking-tight">
+                Manage Project
+              </h1>
+              <Badge
+                variant="secondary"
+                className="rounded-none px-2 py-0.5 text-xs font-semibold"
+              >
+                2
+              </Badge>
+            </div>
+
+            <div className="bg-border hidden h-4 w-[1px] sm:block" />
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground h-8 rounded-none text-xs"
+              >
+                ...
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-border h-8 gap-1 rounded-none text-xs font-medium"
+              >
+                <Filter className="mr-1 h-3 w-3" /> Filter
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchQuery(null)}
+                className="text-muted-foreground hover:text-foreground h-8 rounded-none text-xs"
+              >
+                Clear
+              </Button>
+            </div>
           </div>
 
-          <div className="bg-border hidden h-4 w-[1px] sm:block" />
+          {/* Right Search & Action Buttons */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative w-full max-w-xs sm:w-64">
+              <Search className="text-muted-foreground absolute top-2.5 left-3 h-3.5 w-3.5" />
+              <Input
+                placeholder="Find projects here"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value || null)}
+                className="bg-secondary/30 border-border focus-visible:ring-primary h-8 rounded-none pr-7 pl-8 text-xs"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery(null)}
+                  className="text-muted-foreground hover:text-foreground absolute top-2 right-2"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-foreground h-8 text-xs"
-            >
-              ...
-            </Button>
             <Button
               variant="outline"
               size="sm"
-              className="border-border h-8 gap-1 text-xs font-medium"
+              className="border-border h-8 rounded-none text-xs font-medium"
             >
-              <Filter className="mr-1 h-3 w-3" /> Filter
+              <Plus className="mr-1 h-3 w-3" /> Add Clients
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSearchQuery(null)}
-              className="text-muted-foreground hover:text-foreground h-8 text-xs"
-            >
-              Clear
-            </Button>
+
+            <AddProjectDialog onAddProject={handleAddProject} />
           </div>
         </div>
 
-        {/* Right Search & Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative w-full max-w-xs sm:w-64">
-            <Search className="text-muted-foreground absolute top-2.5 left-3 h-3.5 w-3.5" />
-            <Input
-              placeholder="Find projects here"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value || null)}
-              className="bg-secondary/30 border-border focus-visible:ring-primary h-8 pr-7 pl-8 text-xs"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery(null)}
-                className="text-muted-foreground hover:text-foreground absolute top-2 right-2"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-border h-8 text-xs font-medium"
+        {/* Fixed Tabs Navigation Header */}
+        <div className="bg-card/20 border-border border-b px-4 pt-2">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
           >
-            <Plus className="mr-1 h-3 w-3" /> Add Clients
-          </Button>
-
-          <AddProjectDialog onAddProject={handleAddProject} />
+            <TabsList className="h-10 space-x-6 border-b border-transparent bg-transparent p-0">
+              <TabsTrigger
+                value="client_projects"
+                className="data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground rounded-none border-b-2 border-transparent bg-transparent px-1 py-2 text-xs font-semibold transition-all data-[state=active]:bg-transparent"
+              >
+                Client Projects
+              </TabsTrigger>
+              <TabsTrigger
+                value="in_house_projects"
+                className="data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground rounded-none border-b-2 border-transparent bg-transparent px-1 py-2 text-xs font-semibold transition-all data-[state=active]:bg-transparent"
+              >
+                In House Projects
+              </TabsTrigger>
+              <TabsTrigger
+                value="clients"
+                className="data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground rounded-none border-b-2 border-transparent bg-transparent px-1 py-2 text-xs font-semibold transition-all data-[state=active]:bg-transparent"
+              >
+                Clients
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
-      {/* Tabs Navigation Header */}
-      <div className="border-border bg-card/20 border-b px-4 pt-2">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="h-10 space-x-6 border-b border-transparent bg-transparent p-0">
-            <TabsTrigger
-              value="client_projects"
-              className="data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground rounded-none border-b-2 border-transparent px-1 py-2 text-xs font-semibold transition-all data-[state=active]:bg-transparent"
-            >
-              Client Projects
-            </TabsTrigger>
-            <TabsTrigger
-              value="in_house_projects"
-              className="data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground rounded-none border-b-2 border-transparent px-1 py-2 text-xs font-semibold transition-all data-[state=active]:bg-transparent"
-            >
-              In House Projects
-            </TabsTrigger>
-            <TabsTrigger
-              value="clients"
-              className="data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground rounded-none border-b-2 border-transparent px-1 py-2 text-xs font-semibold transition-all data-[state=active]:bg-transparent"
-            >
-              Clients
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      {/* Grouped Table View */}
-      <div className="space-y-6 p-4">
-        <div className="border-border/80 bg-card overflow-x-auto rounded-lg border shadow-sm">
+      {/* SCROLLABLE TABLE AREA ONLY */}
+      <div className="flex-1 overflow-auto p-4">
+        <div className="border-border/80 bg-card border shadow-sm">
           <table className="w-full border-collapse text-left text-xs">
-            <thead>
-              <tr className="border-border bg-secondary/30 text-muted-foreground border-b font-medium tracking-wider uppercase">
+            {/* Sticky Table Column Headers */}
+            <thead className="border-border bg-secondary text-muted-foreground sticky top-0 z-10 border-b font-medium tracking-wider uppercase shadow-sm">
+              <tr>
                 <th className="w-2/5 p-3">Name</th>
                 <th className="p-3">Stage</th>
                 <th className="p-3">Period</th>
@@ -200,15 +208,13 @@ export function ProjectsView() {
                 return (
                   <tr key={group.name} className="contents">
                     {/* Stage Group Section Title Header */}
-                    <tr className="bg-secondary/20 border-border/80 border-t border-b">
+                    <tr className="bg-secondary/40 border-border/80 border-t border-b">
                       <td
                         colSpan={6}
                         className="text-foreground px-3 py-2.5 text-xs font-semibold"
                       >
                         <div className="flex items-center gap-2">
-                          <span
-                            className={`h-2.5 w-2.5 rounded-full ${group.dotColor}`}
-                          />
+                          <span className={`h-2.5 w-2.5 ${group.dotColor}`} />
                           <span>{group.name}</span>
                           <span className="text-muted-foreground text-[10px] font-normal">
                             ({groupProjects.length})
@@ -226,7 +232,7 @@ export function ProjectsView() {
                         {/* Name Column */}
                         <td className="px-3 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="bg-secondary text-foreground border-border flex h-7 w-7 items-center justify-center rounded border text-xs font-bold">
+                            <div className="bg-secondary text-foreground border-border flex h-7 w-7 items-center justify-center border text-xs font-bold">
                               {project.name.charAt(0).toUpperCase()}
                             </div>
                             <span className="text-foreground text-xs font-semibold">
@@ -239,7 +245,7 @@ export function ProjectsView() {
                         <td className="px-3 py-3">
                           <Badge
                             variant="outline"
-                            className="rounded border-orange-500/30 bg-orange-500/10 px-2 py-0.5 text-[11px] font-normal text-orange-500"
+                            className="rounded-none border-orange-500/30 bg-orange-500/10 px-2 py-0.5 text-[11px] font-normal text-orange-500"
                           >
                             {project.stage}
                           </Badge>
@@ -252,8 +258,8 @@ export function ProjectsView() {
 
                         {/* Manager Column */}
                         <td className="px-3 py-3">
-                          <div className="border-border bg-secondary/40 text-foreground inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs">
-                            <div className="bg-primary/20 text-primary flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold">
+                          <div className="border-border bg-secondary/40 text-foreground inline-flex items-center gap-1.5 border px-2 py-1 text-xs">
+                            <div className="bg-primary/20 text-primary flex h-5 w-5 items-center justify-center text-[10px] font-bold">
                               {project.managerName.charAt(0)}
                             </div>
                             <span className="font-medium">
@@ -271,7 +277,7 @@ export function ProjectsView() {
                           <div className="flex items-center gap-2">
                             <Progress
                               value={project.progress}
-                              className="bg-secondary h-1.5 flex-1"
+                              className="bg-secondary h-1.5 flex-1 rounded-none"
                             />
                             <span className="text-muted-foreground w-8 text-right font-mono text-[11px] font-medium">
                               {project.progress}%
@@ -285,7 +291,7 @@ export function ProjectsView() {
                             <Button
                               variant="outline"
                               size="icon"
-                              className="border-border hover:bg-secondary h-7 w-7"
+                              className="border-border hover:bg-secondary h-7 w-7 rounded-none"
                             >
                               <Pencil className="text-muted-foreground h-3 w-3" />
                             </Button>
@@ -293,14 +299,14 @@ export function ProjectsView() {
                               variant="outline"
                               size="icon"
                               onClick={() => handleDeleteProject(project.id)}
-                              className="border-border hover:bg-destructive/10 hover:text-destructive h-7 w-7"
+                              className="border-border hover:bg-destructive/10 hover:text-destructive h-7 w-7 rounded-none"
                             >
                               <Trash2 className="h-3 w-3" />
                             </Button>
                             <Button
                               variant="outline"
                               size="icon"
-                              className="border-border hover:bg-secondary h-7 w-7"
+                              className="border-border hover:bg-secondary h-7 w-7 rounded-none"
                             >
                               <ExternalLink className="text-muted-foreground h-3 w-3" />
                             </Button>
@@ -317,7 +323,7 @@ export function ProjectsView() {
       </div>
 
       {/* Floating Chat Widget Button (Bottom Right) */}
-      <button className="bg-primary fixed right-6 bottom-6 flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-xl transition-all hover:scale-105 focus:outline-none">
+      <button className="bg-primary hover:bg-primary/90 fixed right-6 bottom-6 flex h-12 w-12 items-center justify-center text-white shadow-xl transition-all hover:scale-105 focus:outline-none">
         <MessageSquare className="h-6 w-6" />
       </button>
     </div>
