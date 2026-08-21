@@ -26,6 +26,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const projectNavItems = [
   {
@@ -48,14 +49,19 @@ export function AppSidebar() {
         collapsible="icon"
         className="border-sidebar-border bg-sidebar border-r"
       >
-        {/* Brand Header with Collapse Icon */}
+        {/* Brand Header with Center-Aligned Collapse Icon */}
         <SidebarHeader className="border-sidebar-border border-b p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="border-primary/40 bg-primary/20 text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border shadow-inner">
-                <Layers className="h-4 w-4" />
-              </div>
-              {!isCollapsed && (
+          <div
+            className={cn(
+              "flex w-full items-center",
+              isCollapsed ? "justify-center" : "justify-between",
+            )}
+          >
+            {!isCollapsed && (
+              <div className="flex items-center gap-2.5 overflow-hidden">
+                <div className="border-primary/40 bg-primary/20 text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border shadow-inner">
+                  <Layers className="h-4 w-4" />
+                </div>
                 <div className="flex flex-col truncate">
                   <div className="flex items-center gap-2">
                     <span className="text-sidebar-foreground text-xs font-bold tracking-tight">
@@ -69,15 +75,15 @@ export function AppSidebar() {
                     Workspace Engine
                   </span>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Collapse Toggle Button */}
+            {/* Collapse Toggle Button - Always Centered in Collapsed Mode */}
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleSidebar}
-              className="text-muted-foreground hover:text-foreground h-7 w-7 shrink-0 rounded-none"
+              className="text-muted-foreground hover:text-foreground h-8 w-8 shrink-0 rounded-none"
               title={isCollapsed ? "Expand sidebar" : "Minimize sidebar"}
             >
               {isCollapsed ? (
@@ -89,9 +95,8 @@ export function AppSidebar() {
           </div>
         </SidebarHeader>
 
-        {/* Sidebar Content */}
+        {/* Sidebar Content - Centered Icons when Collapsed */}
         <SidebarContent className="px-2 py-3">
-          {/* Projects Menu Group */}
           <SidebarGroup>
             {!isCollapsed && (
               <SidebarGroupLabel className="text-muted-foreground px-3 text-[11px] font-semibold tracking-wider uppercase">
@@ -101,13 +106,26 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {projectNavItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem
+                    key={item.title}
+                    className="flex justify-center"
+                  >
                     <SidebarMenuButton
                       isActive={item.isActive}
                       tooltip={item.title}
-                      className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-primary/20 data-[active=true]:text-primary text-sidebar-foreground w-full justify-between rounded-none transition-colors"
+                      className={cn(
+                        "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-primary/20 data-[active=true]:text-primary text-sidebar-foreground w-full rounded-none transition-colors",
+                        isCollapsed
+                          ? "h-9 justify-center px-0"
+                          : "justify-between",
+                      )}
                     >
-                      <div className="flex items-center gap-2.5">
+                      <div
+                        className={cn(
+                          "flex items-center gap-2.5",
+                          isCollapsed && "w-full justify-center",
+                        )}
+                      >
                         <item.icon className="text-primary h-4 w-4 shrink-0" />
                         {!isCollapsed && (
                           <span className="text-xs font-medium">
@@ -131,15 +149,17 @@ export function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
 
-        {/* Sidebar Footer with Settings & Profile */}
+        {/* Sidebar Footer - Centered Settings & Profile when Collapsed */}
         <SidebarFooter className="border-sidebar-border space-y-1 border-t p-2">
-          {/* Settings Menu Button */}
           <SidebarMenu>
-            <SidebarMenuItem>
+            <SidebarMenuItem className="flex justify-center">
               <SidebarMenuButton
                 onClick={() => setSettingsOpen(true)}
                 tooltip="Settings"
-                className="hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground w-full justify-start rounded-none transition-colors"
+                className={cn(
+                  "hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground w-full rounded-none transition-colors",
+                  isCollapsed ? "h-9 justify-center px-0" : "justify-start",
+                )}
               >
                 <Settings className="text-muted-foreground h-4 w-4 shrink-0" />
                 {!isCollapsed && (
@@ -168,7 +188,7 @@ export function AppSidebar() {
               <LogOut className="text-muted-foreground hover:text-foreground h-4 w-4 shrink-0 cursor-pointer" />
             </div>
           ) : (
-            <div className="flex items-center justify-center py-2">
+            <div className="flex w-full items-center justify-center py-2">
               <div
                 className="border-primary/40 bg-primary/30 text-primary-foreground flex h-7 w-7 items-center justify-center rounded-full border text-xs font-bold"
                 title="Lead Engineer (admin@project-epd.io)"
