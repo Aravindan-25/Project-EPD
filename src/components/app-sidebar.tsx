@@ -78,12 +78,17 @@ export function AppSidebar() {
               </div>
             )}
 
-            {/* Collapse Toggle Button - Always Centered in Collapsed Mode */}
+            {/* Collapse Toggle Button - Balanced Square Space */}
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleSidebar}
-              className="text-muted-foreground hover:text-foreground h-8 w-8 shrink-0 rounded-none"
+              className={cn(
+                "text-muted-foreground hover:text-foreground shrink-0 rounded-none transition-colors",
+                isCollapsed
+                  ? "mx-auto flex h-8 w-8 items-center justify-center p-0"
+                  : "h-7 w-7",
+              )}
               title={isCollapsed ? "Expand sidebar" : "Minimize sidebar"}
             >
               {isCollapsed ? (
@@ -95,9 +100,9 @@ export function AppSidebar() {
           </div>
         </SidebarHeader>
 
-        {/* Sidebar Content - Centered Icons when Collapsed */}
-        <SidebarContent className="px-2 py-3">
-          <SidebarGroup>
+        {/* Sidebar Content - Balanced Square Space Around Icons */}
+        <SidebarContent className={cn("py-3", isCollapsed ? "px-1" : "px-2")}>
+          <SidebarGroup className="p-0">
             {!isCollapsed && (
               <SidebarGroupLabel className="text-muted-foreground px-3 text-[11px] font-semibold tracking-wider uppercase">
                 Navigation
@@ -114,16 +119,17 @@ export function AppSidebar() {
                       isActive={item.isActive}
                       tooltip={item.title}
                       className={cn(
-                        "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-primary/20 data-[active=true]:text-primary text-sidebar-foreground w-full rounded-none transition-colors",
+                        "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-primary/20 data-[active=true]:text-primary text-sidebar-foreground rounded-none transition-colors",
                         isCollapsed
-                          ? "h-9 justify-center px-0"
-                          : "justify-between",
+                          ? "mx-auto flex h-8 w-8 items-center justify-center p-0"
+                          : "w-full justify-between",
                       )}
                     >
                       <div
                         className={cn(
                           "flex items-center gap-2.5",
-                          isCollapsed && "w-full justify-center",
+                          isCollapsed &&
+                            "h-full w-full items-center justify-center",
                         )}
                       >
                         <item.icon className="text-primary h-4 w-4 shrink-0" />
@@ -149,16 +155,23 @@ export function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
 
-        {/* Sidebar Footer - Centered Settings & Profile when Collapsed */}
-        <SidebarFooter className="border-sidebar-border space-y-1 border-t p-2">
+        {/* Sidebar Footer - Balanced Square Space Around Footer Buttons */}
+        <SidebarFooter
+          className={cn(
+            "border-sidebar-border border-t py-2",
+            isCollapsed ? "space-y-2 px-1" : "space-y-1 px-2",
+          )}
+        >
           <SidebarMenu>
             <SidebarMenuItem className="flex justify-center">
               <SidebarMenuButton
                 onClick={() => setSettingsOpen(true)}
                 tooltip="Settings"
                 className={cn(
-                  "hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground w-full rounded-none transition-colors",
-                  isCollapsed ? "h-9 justify-center px-0" : "justify-start",
+                  "hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground rounded-none transition-colors",
+                  isCollapsed
+                    ? "mx-auto flex h-8 w-8 items-center justify-center p-0"
+                    : "w-full justify-start",
                 )}
               >
                 <Settings className="text-muted-foreground h-4 w-4 shrink-0" />
@@ -188,9 +201,9 @@ export function AppSidebar() {
               <LogOut className="text-muted-foreground hover:text-foreground h-4 w-4 shrink-0 cursor-pointer" />
             </div>
           ) : (
-            <div className="flex w-full items-center justify-center py-2">
+            <div className="flex w-full items-center justify-center py-1">
               <div
-                className="border-primary/40 bg-primary/30 text-primary-foreground flex h-7 w-7 items-center justify-center rounded-full border text-xs font-bold"
+                className="border-primary/40 bg-primary/30 text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold"
                 title="Lead Engineer (admin@project-epd.io)"
               >
                 EP
