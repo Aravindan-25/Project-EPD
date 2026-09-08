@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 @layer base {
+  html {
+    font-size: 16px;
+  }
+
   :root {
     /* Light Mode */
     --background: 0 0% 100%;
@@ -103,6 +107,7 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-outfit), "Outfit", sans-serif;
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -163,6 +168,7 @@
 }
 
 body {
+  font-family: var(--font-outfit), "Outfit", sans-serif;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-feature-settings:
