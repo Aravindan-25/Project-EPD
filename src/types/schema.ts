@@ -3,6 +3,7 @@ import { z } from "zod";
 export const taskStatusSchema = z.enum([
   "todo",
   "in_progress",
+  "move_to_qa",
   "completed",
   "archived",
 ]);

@@ -18,12 +18,14 @@ import {
   type Project,
   type ProjectStage,
   type TeamMember,
+  type ProjectTeam,
   type UserRoleProfile,
 } from "@/types/project";
 import { SAMPLE_CLIENTS, type Client } from "@/types/client";
 import { AddProjectDialog } from "@/components/add-project-dialog";
 import { AddClientDialog } from "@/components/add-client-dialog";
 import { ManageTeamDialog } from "@/components/manage-team-dialog";
+import { ProjectDetailView } from "@/components/project-detail-view";
 import { ClientsTable } from "@/components/clients-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +48,7 @@ const STAGE_GROUPS: { name: ProjectStage; dotColor: string }[] = [
 export function ProjectsView() {
   const [projects, setProjects] = useState<Project[]>(SAMPLE_PROJECTS);
   const [clients, setClients] = useState<Client[]>(SAMPLE_CLIENTS);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   // URL state management with nuqs
   const [activeTab, setActiveTab] = useQueryState(
@@ -57,6 +60,21 @@ export function ProjectsView() {
     parseAsString.withDefault(""),
   );
   const [userCode] = useQueryState("user", parseAsString.withDefault("ADMIN"));
+  const [urlProjectId, setUrlProjectId] = useQueryState(
+    "projectId",
+    parseAsString.withDefault(""),
+  );
+
+  const activeSelectedProject = useMemo(() => {
+    if (urlProjectId) {
+      return (
+        projects.find(
+          (p) => p.id === urlProjectId || p.code === urlProjectId,
+        ) || selectedProject
+      );
+    }
+    return selectedProject;
+  }, [projects, urlProjectId, selectedProject]);
 
   const currentUser: UserRoleProfile =
     USER_PROFILES.find((u) => u.code === userCode) || USER_PROFILES[0];
@@ -69,9 +87,15 @@ export function ProjectsView() {
     setProjects((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const handleUpdateTeam = (projectId: string, teamMembers: TeamMember[]) => {
+  const handleUpdateTeam = (
+    projectId: string,
+    teamMembers: TeamMember[],
+    teams?: ProjectTeam[],
+  ) => {
     setProjects((prev) =>
-      prev.map((p) => (p.id === projectId ? { ...p, teamMembers } : p)),
+      prev.map((p) =>
+        p.id === projectId ? { ...p, teamMembers, teams: teams || p.teams } : p,
+      ),
     );
   };
 
@@ -124,6 +148,24 @@ export function ProjectsView() {
       );
     });
   }, [clients, searchQuery]);
+
+  if (activeSelectedProject) {
+    return (
+      <ProjectDetailView
+        project={activeSelectedProject}
+        onBack={() => {
+          setSelectedProject(null);
+          setUrlProjectId("");
+        }}
+        onUpdateTeam={(projectId, teamMembers, teams) => {
+          handleUpdateTeam(projectId, teamMembers, teams);
+          setSelectedProject((prev) =>
+            prev ? { ...prev, teamMembers, teams: teams || prev.teams } : null,
+          );
+        }}
+      />
+    );
+  }
 
   return (
     <div className="bg-background text-foreground flex h-screen flex-col overflow-hidden">
@@ -255,169 +297,204 @@ export function ProjectsView() {
         />
       ) : (
         <div className="flex-1 overflow-auto">
-          <table className="w-full table-fixed border-collapse text-left text-xs">
+          <table className="w-full min-w-[1100px] table-fixed border-collapse text-left text-xs">
             {/* Sticky Table Column Headers */}
             <thead className="border-border bg-secondary text-muted-foreground sticky top-0 z-10 border-b font-medium tracking-wider uppercase opacity-100 shadow-sm">
               <tr>
-                <th className="bg-secondary w-[20%] p-3.5 pl-6 font-semibold">
+                <th className="bg-secondary w-[22%] p-3.5 pl-6 font-semibold">
                   Name
                 </th>
-                <th className="bg-secondary w-[15%] p-3.5 font-semibold">
+                <th className="bg-secondary w-[12%] p-3.5 font-semibold">
                   Stage
                 </th>
-                <th className="bg-secondary w-[20%] p-3.5 font-semibold">
+                <th className="bg-secondary w-[16%] p-3.5 font-semibold">
                   Period
                 </th>
-                <th className="bg-secondary w-[20%] p-3.5 font-semibold">
+                <th className="bg-secondary w-[18%] p-3.5 font-semibold">
                   Manager
                 </th>
-                <th className="bg-secondary w-[13%] p-3.5 font-semibold">
+                <th className="bg-secondary w-[12%] p-3.5 font-semibold">
                   Progress
                 </th>
-                <th className="bg-secondary w-[12%] p-3.5 pr-6 text-right font-semibold">
+                <th className="bg-secondary w-[20%] p-3.5 pr-6 text-right font-semibold">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody className="divide-border/50 bg-card divide-y">
-              {STAGE_GROUPS.map((group) => {
-                const groupProjects = filteredProjects.filter(
-                  (p) => p.stageGroup === group.name,
-                );
+              {filteredProjects.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="text-muted-foreground py-12 text-center text-xs"
+                  >
+                    No projects found for the selected criteria.
+                  </td>
+                </tr>
+              ) : (
+                STAGE_GROUPS.map((group) => {
+                  const groupProjects = filteredProjects.filter(
+                    (p) => p.stageGroup === group.name,
+                  );
 
-                if (groupProjects.length === 0 && searchQuery) return null;
+                  if (groupProjects.length === 0) return null;
 
-                return (
-                  <Fragment key={group.name}>
-                    {/* Stage Group Section Title Header */}
-                    <tr className="bg-secondary/60 border-border border-t border-b">
-                      <td
-                        colSpan={6}
-                        className="text-foreground py-2.5 pr-6 pl-6 text-xs font-semibold"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className={`h-2.5 w-2.5 ${group.dotColor}`} />
-                          <span>{group.name}</span>
-                          <span className="text-muted-foreground text-[10px] font-normal">
-                            ({groupProjects.length})
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-
-                    {/* Project Rows under Group */}
-                    {groupProjects.map((project) => (
-                      <tr
-                        key={project.id}
-                        className="hover:bg-secondary/40 border-border/40 border-b transition-colors"
-                      >
-                        {/* Name Column */}
-                        <td className="py-3 pr-3 pl-6">
-                          <div className="flex items-center gap-3 truncate">
-                            <div className="bg-secondary text-foreground border-border flex h-7 w-7 shrink-0 items-center justify-center border text-xs font-bold">
-                              {project.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="flex flex-col truncate">
-                              <span className="text-foreground truncate text-xs font-semibold">
-                                {project.name}
-                              </span>
-                              {project.teamMembers &&
-                                project.teamMembers.length > 0 && (
-                                  <span className="text-muted-foreground truncate text-[10px]">
-                                    {project.teamMembers.length} members • TL:{" "}
-                                    {project.teamMembers.find(
-                                      (m) => m.isTechLead,
-                                    )?.name || "None"}
-                                  </span>
-                                )}
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Stage Column */}
-                        <td className="px-3 py-3">
-                          <Badge
-                            variant="outline"
-                            className="rounded-none border-orange-500/30 bg-orange-500/10 px-2 py-0.5 text-[11px] font-normal text-orange-500"
-                          >
-                            {project.stage}
-                          </Badge>
-                        </td>
-
-                        {/* Period Column */}
-                        <td className="text-muted-foreground truncate px-3 py-3 font-mono text-xs">
-                          {project.periodStart} - {project.periodEnd}
-                        </td>
-
-                        {/* Manager Column */}
-                        <td className="px-3 py-3">
-                          <div className="border-border bg-secondary/50 text-foreground inline-flex max-w-full items-center gap-1.5 truncate border px-2 py-1 text-xs">
-                            <div className="bg-primary/20 text-primary flex h-5 w-5 shrink-0 items-center justify-center text-[10px] font-bold">
-                              {project.managerName.charAt(0)}
-                            </div>
-                            <span className="truncate font-medium">
-                              {project.managerName}
-                            </span>
-                            <span className="text-muted-foreground shrink-0 text-[10px]">
-                              ({project.managerCode})
-                            </span>
-                            <ChevronDown className="text-muted-foreground ml-1 h-3 w-3 shrink-0" />
-                          </div>
-                        </td>
-
-                        {/* Progress Column */}
-                        <td className="px-3 py-3">
+                  return (
+                    <Fragment key={group.name}>
+                      {/* Stage Group Section Title Header */}
+                      <tr className="bg-secondary/60 border-border border-t border-b">
+                        <td
+                          colSpan={6}
+                          className="text-foreground py-2.5 pr-6 pl-6 text-xs font-semibold"
+                        >
                           <div className="flex items-center gap-2">
-                            <Progress
-                              value={project.progress}
-                              className="bg-secondary h-1.5 flex-1 rounded-none"
-                            />
-                            <span className="text-muted-foreground w-8 shrink-0 text-right font-mono text-[11px] font-medium">
-                              {project.progress}%
+                            <span className={`h-2.5 w-2.5 ${group.dotColor}`} />
+                            <span>{group.name}</span>
+                            <span className="text-muted-foreground text-[10px] font-normal">
+                              ({groupProjects.length})
                             </span>
-                          </div>
-                        </td>
-
-                        {/* Actions Column */}
-                        <td className="py-3 pr-6 pl-3 text-right">
-                          <div className="inline-flex items-center gap-1">
-                            {/* Manage Team & Tech Lead Button */}
-                            <ManageTeamDialog
-                              project={project}
-                              onUpdateTeam={handleUpdateTeam}
-                            />
-
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="border-border hover:bg-secondary h-7 w-7 rounded-none"
-                            >
-                              <Pencil className="text-muted-foreground h-3 w-3" />
-                            </Button>
-
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleDeleteProject(project.id)}
-                              className="border-border hover:bg-destructive/10 hover:text-destructive h-7 w-7 rounded-none"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="border-border hover:bg-secondary h-7 w-7 rounded-none"
-                            >
-                              <ExternalLink className="text-muted-foreground h-3 w-3" />
-                            </Button>
                           </div>
                         </td>
                       </tr>
-                    ))}
-                  </Fragment>
-                );
-              })}
+
+                      {/* Project Rows under Group */}
+                      {groupProjects.map((project) => (
+                        <tr
+                          key={project.id}
+                          className="hover:bg-secondary/40 border-border/40 border-b transition-colors"
+                        >
+                          {/* Name Column */}
+                          <td
+                            onClick={() => setSelectedProject(project)}
+                            className="group cursor-pointer py-3 pr-3 pl-6"
+                          >
+                            <div className="flex items-center gap-3 truncate">
+                              <div className="bg-secondary text-foreground border-border group-hover:border-primary flex h-7 w-7 shrink-0 items-center justify-center border text-xs font-bold">
+                                {project.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="flex flex-col truncate">
+                                <span className="text-foreground group-hover:text-primary truncate text-xs font-semibold">
+                                  {project.name}
+                                </span>
+                                {project.teams && project.teams.length > 0 ? (
+                                  <span className="text-muted-foreground mt-0.5 flex items-center gap-1 truncate text-[10px]">
+                                    <span className="text-primary font-bold">
+                                      {project.teams.length}{" "}
+                                      {project.teams.length === 1
+                                        ? "Team"
+                                        : "Teams"}
+                                    </span>
+                                    <span>•</span>
+                                    <span>
+                                      {project.teams.reduce(
+                                        (acc, t) => acc + t.members.length,
+                                        0,
+                                      )}{" "}
+                                      members
+                                    </span>
+                                  </span>
+                                ) : (
+                                  project.teamMembers &&
+                                  project.teamMembers.length > 0 && (
+                                    <span className="text-muted-foreground truncate text-[10px]">
+                                      {project.teamMembers.length} members • TL:{" "}
+                                      {project.teamMembers.find(
+                                        (m) => m.isTechLead,
+                                      )?.name || "None"}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Stage Column */}
+                          <td className="px-3 py-3">
+                            <Badge
+                              variant="outline"
+                              className="rounded-none border-orange-500/30 bg-orange-500/10 px-2 py-0.5 text-[11px] font-normal text-orange-500"
+                            >
+                              {project.stage}
+                            </Badge>
+                          </td>
+
+                          {/* Period Column */}
+                          <td className="text-muted-foreground truncate px-3 py-3 font-mono text-xs">
+                            {project.periodStart} - {project.periodEnd}
+                          </td>
+
+                          {/* Manager Column */}
+                          <td className="px-3 py-3">
+                            <div className="border-border bg-secondary/50 text-foreground inline-flex max-w-full items-center gap-1.5 truncate border px-2 py-1 text-xs">
+                              <div className="bg-primary/20 text-primary flex h-5 w-5 shrink-0 items-center justify-center text-[10px] font-bold">
+                                {project.managerName.charAt(0)}
+                              </div>
+                              <span className="truncate font-medium">
+                                {project.managerName}
+                              </span>
+                              <span className="text-muted-foreground shrink-0 text-[10px]">
+                                ({project.managerCode})
+                              </span>
+                              <ChevronDown className="text-muted-foreground ml-1 h-3 w-3 shrink-0" />
+                            </div>
+                          </td>
+
+                          {/* Progress Column */}
+                          <td className="px-3 py-3">
+                            <div className="flex items-center gap-2">
+                              <Progress
+                                value={project.progress}
+                                className="bg-secondary h-1.5 flex-1 rounded-none"
+                              />
+                              <span className="text-muted-foreground w-8 shrink-0 text-right font-mono text-[11px] font-medium">
+                                {project.progress}%
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Actions Column */}
+                          <td className="py-3 pr-6 pl-3 text-right">
+                            <div className="inline-flex items-center gap-1">
+                              {/* Manage Team & Tech Lead Button */}
+                              <ManageTeamDialog
+                                project={project}
+                                onUpdateTeam={handleUpdateTeam}
+                              />
+
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="border-border hover:bg-secondary h-7 w-7 rounded-none"
+                              >
+                                <Pencil className="text-muted-foreground h-3 w-3" />
+                              </Button>
+
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleDeleteProject(project.id)}
+                                className="border-border hover:bg-destructive/10 hover:text-destructive h-7 w-7 rounded-none"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setSelectedProject(project)}
+                                className="border-border hover:bg-secondary h-7 w-7 cursor-pointer rounded-none"
+                                title="View Detailed Screen"
+                              >
+                                <ExternalLink className="text-muted-foreground h-3 w-3" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </Fragment>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

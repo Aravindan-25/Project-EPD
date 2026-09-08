@@ -23,9 +23,28 @@ export const teamMemberSchema = z.object({
 
 export type TeamMember = z.infer<typeof teamMemberSchema>;
 
+export const projectTeamSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, "Team name is required"),
+  leadName: z.string().optional(),
+  description: z.string().optional(),
+  members: z.array(teamMemberSchema),
+});
+
+export type ProjectTeam = z.infer<typeof projectTeamSchema>;
+
 export const createProjectFormSchema = z.object({
   name: z.string().min(2, "Project name must be at least 2 characters"),
   code: z.string().optional(),
+  department: z.string().optional(),
+  projectType: z.string().optional(),
+  projectStatus: z.string().optional(),
+  clientEmail: z.string().optional(),
+  secondaryEmails: z.array(z.string()).optional(),
+  startTime: z.string().optional(),
+  createdBy: z.string().optional(),
+  createdAt: z.string().optional(),
+  lastUpdated: z.string().optional(),
   stageGroup: projectStageSchema,
   stage: z.string(),
   periodStart: z.string().min(1, "Start Date is required"),
@@ -40,6 +59,7 @@ export const createProjectFormSchema = z.object({
   contactPerson: z.string().optional(),
   deliveryHead: z.string().optional(),
   teamMembers: z.array(teamMemberSchema).optional(),
+  teams: z.array(projectTeamSchema).optional(),
 });
 
 export type CreateProjectFormValues = z.infer<typeof createProjectFormSchema>;
@@ -104,6 +124,31 @@ export const USER_PROFILES: UserRoleProfile[] = [
 
 export const SAMPLE_PROJECTS: Project[] = [
   {
+    id: "prj-01",
+    name: "Alpha Vision Segmentation",
+    code: "PRJ-001",
+    department: "data_processing",
+    projectType: "Data Annotation",
+    projectStatus: "IN_PROGRESS",
+    stageGroup: "In Development",
+    stage: "IN_PROGRESS",
+    periodStart: "2026-08-01",
+    periodEnd: "2026-12-31",
+    managerName: "Vikram Malhotra",
+    managerCode: "EMP-102",
+    progress: 45,
+    clientType: "client",
+    clientName: "BioTech Global Corp",
+    clientEmail: "biotech.client@biotech-global.com",
+    secondaryEmails: ["ops@biotech-global.com", "delivery@biotech-global.com"],
+    description:
+      "High-density medical image segmentation and cellular boundaries tagging.",
+    startTime: "09:00",
+    createdBy: "Vikram Malhotra",
+    createdAt: "Aug 1, 2026, 02:30 PM",
+    lastUpdated: "Aug 25, 2026, 07:30 PM",
+  },
+  {
     id: "PRJ-01",
     name: "Appofy",
     code: "APP-01",
@@ -129,6 +174,45 @@ export const SAMPLE_PROJECTS: Project[] = [
         role: "Frontend Developer",
         email: "pooja@ailoitte.com",
         isTechLead: false,
+      },
+    ],
+    teams: [
+      {
+        id: "team-1",
+        name: "Frontend Web Team",
+        leadName: "Amit Sharma",
+        description: "Next.js & Tailwind CSS UI Development",
+        members: [
+          {
+            id: "tm-1",
+            name: "Amit Sharma",
+            role: "Senior Fullstack Engineer",
+            email: "amit@ailoitte.com",
+            isTechLead: true,
+          },
+          {
+            id: "tm-2",
+            name: "Pooja Verma",
+            role: "Frontend Developer",
+            email: "pooja@ailoitte.com",
+            isTechLead: false,
+          },
+        ],
+      },
+      {
+        id: "team-2",
+        name: "Backend Core API Team",
+        leadName: "Rahul Verma",
+        description: "Node.js Microservices & DB Architecture",
+        members: [
+          {
+            id: "tm-10",
+            name: "Rahul Verma",
+            role: "Backend Architect",
+            email: "rahul.v@ailoitte.com",
+            isTechLead: true,
+          },
+        ],
       },
     ],
   },
@@ -158,6 +242,38 @@ export const SAMPLE_PROJECTS: Project[] = [
         role: "UI/UX Designer",
         email: "sneha@ailoitte.com",
         isTechLead: false,
+      },
+    ],
+    teams: [
+      {
+        id: "team-3",
+        name: "Design & UX Team",
+        leadName: "Sneha Patel",
+        description: "UI System & Wireframes",
+        members: [
+          {
+            id: "tm-4",
+            name: "Sneha Patel",
+            role: "UI/UX Designer",
+            email: "sneha@ailoitte.com",
+            isTechLead: true,
+          },
+        ],
+      },
+      {
+        id: "team-4",
+        name: "Engineering & QA",
+        leadName: "Rohan Gupta",
+        description: "Product Development & Testing",
+        members: [
+          {
+            id: "tm-3",
+            name: "Rohan Gupta",
+            role: "Tech Lead",
+            email: "rohan@ailoitte.com",
+            isTechLead: true,
+          },
+        ],
       },
     ],
   },

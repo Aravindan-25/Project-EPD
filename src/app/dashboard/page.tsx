@@ -2,6 +2,6 @@
 
 import { DashboardView } from "@/components/dashboard-view";
 
-export default function Home() {
+export default function DashboardPage() {
   return <DashboardView />;
 }

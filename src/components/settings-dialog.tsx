@@ -8,7 +8,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { applyCombinedTheme } from "@/lib/theme";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -27,13 +30,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   const handleThemeChange = (newTheme: "light" | "dark") => {
     setTheme(newTheme);
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    const colorTheme = localStorage.getItem("themeColor") || "slate";
+    applyCombinedTheme(colorTheme, newTheme);
   };
 
   return (
@@ -109,6 +107,18 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             </div>
           </div>
         </div>
+
+        <DialogFooter className="border-border border-t pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onOpenChange(false)}
+            className="cursor-pointer rounded-none"
+          >
+            Close
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

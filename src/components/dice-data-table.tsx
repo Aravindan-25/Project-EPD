@@ -24,6 +24,7 @@ import {
   Clock,
   AlertCircle,
   Archive,
+  ShieldCheck,
 } from "lucide-react";
 import { type Task } from "@/types/schema";
 import {
@@ -149,18 +150,28 @@ export function DiceDataTable({ data }: DiceDataTableProps) {
         accessorKey: "status",
         header: "Status",
         cell: (info) => {
-          const status = String(info.getValue());
+          const status = String(info.getValue()).toLowerCase();
           switch (status) {
             case "completed":
+            case "done":
               return (
                 <Badge className="gap-1 border-emerald-500/30 bg-emerald-500/15 font-medium text-emerald-400">
-                  <CheckCircle2 className="h-3 w-3" /> Completed
+                  <CheckCircle2 className="h-3 w-3 text-emerald-400" />{" "}
+                  {status === "done" ? "Done" : "Completed"}
                 </Badge>
               );
             case "in_progress":
               return (
                 <Badge className="gap-1 border-blue-500/30 bg-blue-500/15 font-medium text-blue-400">
                   <Clock className="h-3 w-3" /> In Progress
+                </Badge>
+              );
+            case "move_to_qa":
+            case "qa":
+            case "move to qa":
+              return (
+                <Badge className="gap-1 border-purple-500/30 bg-purple-500/15 font-medium text-purple-400">
+                  <ShieldCheck className="h-3 w-3 text-purple-400" /> Move to QA
                 </Badge>
               );
             case "todo":
@@ -285,16 +296,67 @@ export function DiceDataTable({ data }: DiceDataTableProps) {
             value={statusFilter}
             onValueChange={(val) => setStatusFilter(val === "all" ? null : val)}
           >
-            <SelectTrigger className="bg-secondary/30 border-border w-[140px] text-xs">
-              <Filter className="text-muted-foreground mr-1.5 h-3.5 w-3.5" />
-              <SelectValue placeholder="Status" />
+            <SelectTrigger className="bg-secondary/30 border-border min-w-[150px] cursor-pointer text-xs">
+              <div className="flex items-center gap-1.5">
+                {statusFilter === "in_progress" ? (
+                  <Clock className="h-3.5 w-3.5 shrink-0 text-blue-400" />
+                ) : statusFilter === "move_to_qa" || statusFilter === "qa" ? (
+                  <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-purple-400" />
+                ) : statusFilter === "completed" || statusFilter === "done" ? (
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                ) : statusFilter === "todo" ? (
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                ) : statusFilter === "archived" ? (
+                  <Archive className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                ) : (
+                  <Filter className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
+                )}
+                <SelectValue placeholder="Status" />
+              </div>
             </SelectTrigger>
             <SelectContent className="bg-card border-border">
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="todo">To Do</SelectItem>
-              <SelectItem value="archived">Archived</SelectItem>
+              <SelectItem value="all">
+                <div className="flex cursor-pointer items-center gap-2">
+                  <Filter className="text-muted-foreground h-3.5 w-3.5" />
+                  <span>All Statuses</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="in_progress">
+                <div className="flex cursor-pointer items-center gap-2 font-medium text-blue-400">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>In Progress</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="move_to_qa">
+                <div className="flex cursor-pointer items-center gap-2 font-medium text-purple-400">
+                  <ShieldCheck className="h-3.5 w-3.5 text-purple-400" />
+                  <span>Move to QA</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="done">
+                <div className="flex cursor-pointer items-center gap-2 font-medium text-emerald-400">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>Done</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="completed">
+                <div className="flex cursor-pointer items-center gap-2 font-medium text-emerald-400">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>Completed</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="todo">
+                <div className="flex cursor-pointer items-center gap-2 font-medium text-amber-400">
+                  <AlertCircle className="h-3.5 w-3.5" />
+                  <span>To Do</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="archived">
+                <div className="flex cursor-pointer items-center gap-2 font-medium text-slate-400">
+                  <Archive className="h-3.5 w-3.5" />
+                  <span>Archived</span>
+                </div>
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
