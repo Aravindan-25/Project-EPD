@@ -164,6 +164,7 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
 
     const newProject: Project = {
       ...data,
+      department: department,
       id: `PRJ-${data.name.slice(0, 4).toUpperCase()}`,
     };
 
@@ -179,6 +180,7 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
       id: `DP-${(dpProjectName || "PROJ").slice(0, 4).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`,
       name: dpProjectName || "Data Processing Project",
       code: dpProjectCode || `DP-${Math.floor(100 + Math.random() * 900)}`,
+      department: department || "data_processing",
       stageGroup: "New",
       stage: "New",
       periodStart: dpStartDate,

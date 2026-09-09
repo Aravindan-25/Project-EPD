@@ -40,6 +40,7 @@ import {
   Sparkles,
   Package,
   Layers,
+  Files,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -69,60 +70,113 @@ import { SAMPLE_PROJECTS, type Project } from "@/types/project";
 export interface WorkspaceBatch {
   id: string;
   batchCode: string;
+  batchName?: string;
   projectId: string;
   projectName: string;
   recordType: string;
   language: string;
+  sourceType?: string;
+  totalSourceUnits?: number;
   totalImages: number;
   totalSegments: number;
   completedSegments: number;
   assignedDate: string;
   dueDate: string;
-  status: "COMPLETED" | "CREATED" | "IN_PROGRESS" | "IN_PRODUCTION";
+  status: string;
+  lastUpdated?: string;
+}
+
+export interface WorkspaceSegmentItem {
+  id?: string;
+  number?: string;
+  startSourceUnit?: string;
+  endSourceUnit?: string;
+  totalSourceUnits?: string | number;
+  prodStatus?: string;
+  reworkNote?: string;
+  failedQCRef?: string;
+  createdAt?: string;
+  employeeName?: string;
+  employeeId?: string;
+  allocatedAt?: string;
+  lastUpdated?: string;
+  status?: string;
+  operator?: string;
+  operatorId?: string;
+  qcSpecialist?: string;
+  qcEmpId?: string;
+  qcStatus?: string;
+}
+
+export interface WorkspaceProdOutputItem {
+  id?: string;
+  segmentId?: string;
+  productionOutput?: string;
+  outputFileName?: string;
+  outputFile?: string;
+  fileSize?: string;
+  submittedBy?: string;
+  submittedAt?: string;
+  status?: string;
+  recordsCount?: number;
+  reworkStatus?: string;
+  qaScore?: string;
 }
 
 const INITIAL_BATCHES: WorkspaceBatch[] = [
   {
     id: "BAT-001",
     batchCode: "BATCH-001",
+    batchName: "Alpha Records - Batch 01",
     projectId: "prj-01",
     projectName: "Alpha Vision Segmentation",
     recordType: "Birth Records",
     language: "ENGLISH",
+    sourceType: "Images",
+    totalSourceUnits: 500,
     totalImages: 500,
     totalSegments: 10,
     completedSegments: 10,
     assignedDate: "2026-08-05 10:00 AM",
     dueDate: "2026-08-25",
     status: "COMPLETED",
+    lastUpdated: "6 Sep 2026 12:10pm",
   },
   {
     id: "BAT-002",
     batchCode: "BATCH-002",
+    batchName: "Alpha Records - Batch 02",
     projectId: "prj-01",
     projectName: "Alpha Vision Segmentation",
     recordType: "Death Records",
     language: "FRENCH",
+    sourceType: "PDF",
+    totalSourceUnits: 150,
     totalImages: 500,
     totalSegments: 10,
     completedSegments: 10,
     assignedDate: "2026-08-12 11:30 AM",
     dueDate: "2026-08-30",
-    status: "COMPLETED",
+    status: "PRODUCTION IN PROGRESS",
+    lastUpdated: "7 Sep 2026 10:45am",
   },
   {
     id: "BAT-003",
     batchCode: "BATCH-003",
+    batchName: "Alpha Records - Batch 03",
     projectId: "prj-01",
     projectName: "Alpha Vision Segmentation",
     recordType: "Marriage Records",
     language: "ENGLISH",
+    sourceType: "Images",
+    totalSourceUnits: 500,
     totalImages: 500,
     totalSegments: 10,
     completedSegments: 7,
     assignedDate: "2026-08-20 02:15 PM",
     dueDate: "2026-09-10",
-    status: "IN_PRODUCTION",
+    status: "SEGMENTED",
+    lastUpdated: "8 Sep 2026 02:15pm",
   },
 ];
 
@@ -220,22 +274,37 @@ export function ProjectWorkspaceView() {
   const [isAllocateProductionOpen, setIsAllocateProductionOpen] =
     useState(false);
   const [isReallocateOpen, setIsReallocateOpen] = useState(false);
+  const [isViewProdAllocOpen, setIsViewProdAllocOpen] = useState(false);
+  const [isViewProdTrackingOpen, setIsViewProdTrackingOpen] = useState(false);
+  const [isViewProdOutputOpen, setIsViewProdOutputOpen] = useState(false);
+  const [isViewQCAllocOpen, setIsViewQCAllocOpen] = useState(false);
   const [isAllocateQCOpen, setIsAllocateQCOpen] = useState(false);
   const [isReallocateQCOpen, setIsReallocateQCOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedSegmentForAlloc, setSelectedSegmentForAlloc] = useState<Record<
-    string,
-    any
-  > | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [selectedSegmentForAlloc, setSelectedSegmentForAlloc] =
+    useState<WorkspaceSegmentItem | null>(null);
   const [selectedSegmentForRealloc, setSelectedSegmentForRealloc] =
-    useState<Record<string, any> | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    useState<WorkspaceSegmentItem | null>(null);
+
+  const [selectedProdAllocForView, setSelectedProdAllocForView] =
+    useState<WorkspaceSegmentItem | null>(null);
+
+  const [selectedProdTrackingForView, setSelectedProdTrackingForView] =
+    useState<WorkspaceSegmentItem | null>(null);
+
+  const [selectedProdOutputForView, setSelectedProdOutputForView] =
+    useState<WorkspaceProdOutputItem | null>(null);
+
+  const [selectedQCAllocForView, setSelectedQCAllocForView] =
+    useState<WorkspaceSegmentItem | null>(null);
+
   const [selectedSegmentForQCAlloc, setSelectedSegmentForQCAlloc] =
-    useState<Record<string, any> | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    useState<WorkspaceSegmentItem | null>(null);
+
   const [selectedSegmentForQCRealloc, setSelectedSegmentForQCRealloc] =
-    useState<Record<string, any> | null>(null);
+    useState<WorkspaceSegmentItem | null>(null);
+
+  const [reallocHasStarted, setReallocHasStarted] = useState(true);
+  const [reallocCompletedCount, setReallocCompletedCount] = useState(12);
   const [selectedProdEmployee, setSelectedProdEmployee] = useState("EMP-001");
   const [selectedQCEmployee, setSelectedQCEmployee] = useState("EMP-005");
   const [selectedQCSegmentIds, setSelectedQCSegmentIds] = useState<string[]>(
@@ -243,6 +312,12 @@ export function ProjectWorkspaceView() {
   );
   const [qcDemoHasData, setQcDemoHasData] = useState(true);
   const [imagesPerSegment, setImagesPerSegment] = useState(20);
+  const [batchSegmentsCreatedMap, setBatchSegmentsCreatedMap] = useState<
+    Record<string, boolean>
+  >({
+    "BAT-001": true,
+    "BAT-002": true,
+  });
   const [selectedBatchForImages, setSelectedBatchForImages] =
     useState<WorkspaceBatch | null>(null);
 
@@ -339,10 +414,10 @@ export function ProjectWorkspaceView() {
     },
     {
       step: 2,
-      title: "Images",
-      desc: "Image repository and coordinate layers",
-      icon: ImageIcon,
-      badge: `${selectedBatch?.totalImages || 500} Images`,
+      title: "Sources",
+      desc: "Batch source files, images, or PDF documents",
+      icon: Files,
+      badge: `${selectedBatch?.totalSourceUnits || selectedBatch?.totalImages || 500} ${selectedBatch?.sourceType || "Units"}`,
     },
     {
       step: 3,
@@ -505,20 +580,46 @@ export function ProjectWorkspaceView() {
       );
     }
 
-    /* Dedicated New Screen for Module 2: Images */
+    /* Dedicated Screen for Module 2: Sources */
     if (activeModuleId === 2) {
-      const batchCodeLower = selectedBatch.batchCode.toLowerCase();
-      const mockImagesList = Array.from({ length: 11 }, (_, idx) => {
+      const isPdf =
+        (selectedBatch.sourceType || "").toLowerCase() === "pdf" ||
+        selectedBatch.recordType?.toLowerCase().includes("pdf");
+
+      const sourceUnitsList = Array.from({ length: 12 }, (_, idx) => {
         const num = idx + 1;
         const padNum = num < 10 ? `00${num}` : `0${num}`;
-        const sizes = ["2.1 MB", "2.3 MB", "2.5 MB", "2.7 MB", "2.9 MB"];
+        const suId = `SU-${padNum}`;
+        const unitNumber = num;
+
+        let sourceFileName = "";
+        let sourceType = "";
+        let unitRef = "";
+
+        if (isPdf) {
+          sourceFileName = idx < 6 ? "document_001.pdf" : "document_002.pdf";
+          sourceType = "PDF";
+          unitRef = `Page ${padNum}`;
+        } else {
+          sourceFileName = `image_${padNum}.jpg`;
+          sourceType = "Image";
+          unitRef = `Image ${padNum}`;
+        }
+
+        const isSegmented = idx < 10;
+        const segmentId = isSegmented
+          ? `SEG-00${Math.floor(idx / 4) + 1}`
+          : "—";
+
         return {
-          id: `img-${batchCodeLower}-${padNum}`,
-          number: `Image ${num}`,
-          filename: `scan_document_${padNum}.jpg`,
-          type: "image/jpeg",
-          size: sizes[idx % sizes.length],
-          uploadedAt: "2026-08-20 10:30 AM",
+          suId,
+          sourceFileName,
+          sourceType,
+          unitRef,
+          unitNumber,
+          segmentStatus: isSegmented ? "Segmented" : "Not Segmented",
+          segmentId,
+          lastUpdated: "6 Sep 2026 12:10pm",
         };
       });
 
@@ -540,77 +641,133 @@ export function ProjectWorkspaceView() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-foreground text-xl font-bold tracking-tight sm:text-2xl">
-                Images
+                Sources
               </h1>
               <Badge className="bg-primary/10 text-primary border-primary/20 rounded-full border px-3 py-0.5 text-xs font-semibold">
-                30 Images in View
+                {sourceUnitsList.length} Source Units (
+                {selectedBatch.sourceType || (isPdf ? "PDF" : "Image")})
               </Badge>
             </div>
             <p className="text-muted-foreground mt-1 text-xs">
-              Batch-specific image repository and verification manifests.
+              Batch-specific source unit inventory, segmentation status, and
+              file assets.
             </p>
           </div>
 
-          {/* Images Table Card */}
+          {/* Sources Table Card */}
           <Card className="bg-card border-border overflow-hidden rounded-xl shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[11px] font-bold tracking-wider uppercase">
-                    <th className="p-3.5">IMAGE ID</th>
-                    <th className="p-3.5">IMAGE NUMBER</th>
-                    <th className="p-3.5">FILE NAME</th>
-                    <th className="p-3.5">FILE TYPE</th>
-                    <th className="p-3.5">FILE SIZE</th>
-                    <th className="p-3.5">UPLOADED AT</th>
-                    <th className="p-3.5 text-right">ACTIONS</th>
+                    <th className="p-3.5 pl-6">SOURCE UNIT ID</th>
+                    <th className="p-3.5">SOURCE FILE NAME</th>
+                    <th className="p-3.5">SOURCE TYPE</th>
+                    <th className="p-3.5">UNIT REFERENCE</th>
+                    <th className="p-3.5">SOURCE UNIT NUMBER</th>
+                    <th className="p-3.5">SEGMENT STATUS</th>
+                    <th className="p-3.5">SEGMENT ID</th>
+                    <th className="p-3.5">LAST UPDATED</th>
+                    <th className="p-3.5 pr-6 text-right">ACTIONS</th>
                   </tr>
                 </thead>
-                <tbody className="divide-border/60 divide-y font-mono">
-                  {mockImagesList.map((img) => (
+                <tbody className="divide-border/60 divide-y">
+                  {sourceUnitsList.map((unit) => (
                     <tr
-                      key={img.id}
+                      key={unit.suId}
                       className="hover:bg-secondary/20 transition-colors"
                     >
-                      <td className="text-foreground p-3.5 font-mono font-bold">
-                        {img.id}
+                      {/* 1. Source Unit ID */}
+                      <td className="text-foreground p-3.5 pl-6 font-mono font-bold">
+                        {unit.suId}
                       </td>
-                      <td className="p-3.5">
-                        <span className="bg-primary/10 text-primary border-primary/20 rounded-full border px-2.5 py-0.5 font-sans text-[11px] font-semibold">
-                          {img.number}
-                        </span>
-                      </td>
-                      <td className="text-foreground p-3.5 font-sans font-bold">
+
+                      {/* 2. Source File Name */}
+                      <td className="text-foreground p-3.5 font-bold">
                         <span className="flex items-center gap-2">
                           <div className="bg-primary/10 text-primary flex h-6 w-6 shrink-0 items-center justify-center rounded">
-                            <ImageIcon className="h-3.5 w-3.5" />
+                            {unit.sourceType === "PDF" ? (
+                              <FileText className="h-3.5 w-3.5" />
+                            ) : (
+                              <ImageIcon className="h-3.5 w-3.5" />
+                            )}
                           </div>
-                          {img.filename}
+                          {unit.sourceFileName}
                         </span>
                       </td>
-                      <td className="text-muted-foreground p-3.5">
-                        {img.type}
+
+                      {/* 3. Source Type */}
+                      <td className="p-3.5">
+                        <span className="bg-secondary border-border text-foreground rounded-md border px-2.5 py-0.5 font-mono text-[11px] font-semibold">
+                          {unit.sourceType}
+                        </span>
                       </td>
-                      <td className="text-muted-foreground p-3.5">
-                        {img.size}
+
+                      {/* 4. Unit Reference */}
+                      <td className="p-3.5">
+                        <span className="bg-primary/10 text-primary border-primary/20 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
+                          {unit.unitRef}
+                        </span>
                       </td>
-                      <td className="text-muted-foreground p-3.5 whitespace-nowrap">
-                        {img.uploadedAt}
+
+                      {/* 5. Source Unit Number */}
+                      <td className="text-foreground p-3.5 font-mono font-bold">
+                        {unit.unitNumber}
                       </td>
-                      <td className="space-x-2 p-3.5 text-right font-sans whitespace-nowrap">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-border h-7 cursor-pointer gap-1.5 rounded-lg text-xs font-semibold"
-                        >
-                          <Eye className="h-3.5 w-3.5" /> View
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground h-7 cursor-pointer gap-1.5 rounded-lg text-xs font-semibold"
-                        >
-                          <Download className="h-3.5 w-3.5" /> Download
-                        </Button>
+
+                      {/* 6. Segment Status */}
+                      <td className="p-3.5">
+                        {unit.segmentStatus === "Segmented" ? (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                            Segmented
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-600 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-400">
+                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                            Not Segmented
+                          </span>
+                        )}
+                      </td>
+
+                      {/* 7. Segment ID */}
+                      <td className="p-3.5">
+                        {unit.segmentId !== "—" ? (
+                          <span className="text-primary font-mono text-xs font-bold">
+                            {unit.segmentId}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground font-mono text-xs">
+                            —
+                          </span>
+                        )}
+                      </td>
+
+                      {/* 8. Last Updated */}
+                      <td className="text-muted-foreground p-3.5 font-mono text-xs whitespace-nowrap">
+                        {unit.lastUpdated}
+                      </td>
+
+                      {/* 9. Actions */}
+                      <td className="p-3.5 pr-6 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-foreground h-7 w-7 cursor-pointer rounded-md"
+                            title="View"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-foreground h-7 w-7 cursor-pointer rounded-md"
+                            title="Download"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -622,37 +779,41 @@ export function ProjectWorkspaceView() {
       );
     }
 
-    /* Dedicated New Screen for Module 3: Segments */
+    /* Dedicated Screen for Module 3: Segments */
     if (activeModuleId === 3) {
       const batchCodeLower = selectedBatch.batchCode.toLowerCase();
+      const hasSegmentsCreated =
+        !!batchSegmentsCreatedMap[selectedBatch.id || selectedBatch.batchCode];
+
       const mockSegmentsList = Array.from({ length: 12 }, (_, idx) => {
         const num = idx + 1;
         const padNum = num < 10 ? `0${num}` : `${num}`;
-        const startImg = idx * 20 + 1;
-        const endImg = (idx + 1) * 20;
+        const startUnit = idx * 20 + 1;
+        const endUnit = (idx + 1) * 20;
         const padStart =
-          startImg < 10
-            ? `00${startImg}`
-            : startImg < 100
-              ? `0${startImg}`
-              : `${startImg}`;
+          startUnit < 10
+            ? `00${startUnit}`
+            : startUnit < 100
+              ? `0${startUnit}`
+              : `${startUnit}`;
         const padEnd =
-          endImg < 10
-            ? `00${endImg}`
-            : endImg < 100
-              ? `0${endImg}`
-              : `${endImg}`;
+          endUnit < 10
+            ? `00${endUnit}`
+            : endUnit < 100
+              ? `0${endUnit}`
+              : `${endUnit}`;
 
         return {
-          id: `seg-${batchCodeLower}-${padNum}`,
+          id: `SEG-${padNum}`,
           number: `Segment ${num}`,
-          startImg: `img-${batchCodeLower}-${padStart}`,
-          endImg: `img-${batchCodeLower}-${padEnd}`,
-          count: "20 images",
-          prodStatus: "PENDING",
-          qcStatus: "PENDING",
+          startSourceUnit: `SU-${padStart}`,
+          endSourceUnit: `SU-${padEnd}`,
+          totalSourceUnits: "20 units",
+          prodStatus:
+            idx < 4 ? "COMPLETED" : idx < 8 ? "IN_PROGRESS" : "PENDING",
+          qcStatus: idx < 4 ? "PASSED" : "PENDING",
           createdAt: "6 Sep 2026 10:30am",
-          updatedAt: "6 Sep 2026 10:30am",
+          lastUpdated: "6 Sep 2026 12:10pm",
         };
       });
 
@@ -670,19 +831,21 @@ export function ProjectWorkspaceView() {
             </button>
           </div>
 
-          {/* Header Row: Title, Subtitle & Recreate Segment Button */}
+          {/* Header Row: Title, Subtitle & Create / Recreate Segment Button */}
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-foreground text-xl font-bold tracking-tight sm:text-2xl">
                   Segments
                 </h1>
-                <Badge className="bg-primary/10 text-primary border-primary/20 rounded-full border px-3 py-0.5 text-xs font-semibold">
-                  25 Segments
-                </Badge>
+                {hasSegmentsCreated && (
+                  <Badge className="bg-primary/10 text-primary border-primary/20 rounded-full border px-3 py-0.5 text-xs font-semibold">
+                    {mockSegmentsList.length} Segments
+                  </Badge>
+                )}
               </div>
               <p className="text-muted-foreground mt-1 text-xs">
-                Granular slice records, image boundaries, and operational
+                Granular slice records, source unit boundaries, and operational
                 segment tracking.
               </p>
             </div>
@@ -691,92 +854,152 @@ export function ProjectWorkspaceView() {
               onClick={() => setIsRecreateSegmentOpen(true)}
               className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer gap-1.5 self-start rounded-lg px-4 py-2 text-xs font-semibold sm:self-auto"
             >
-              <RotateCcw className="h-3.5 w-3.5" /> Recreate Segment
+              {hasSegmentsCreated ? (
+                <>
+                  <RotateCcw className="h-3.5 w-3.5" /> Recreate Segment
+                </>
+              ) : (
+                <>
+                  <Plus className="h-3.5 w-3.5" /> Create Segment
+                </>
+              )}
             </Button>
           </div>
 
-          {/* Sub-Tabs Row */}
-          <div className="border-border flex items-center gap-6 border-b pb-2 text-xs font-semibold">
-            <button
-              type="button"
-              className="border-primary text-primary flex cursor-pointer items-center gap-2 border-b-2 pb-2 font-bold transition-all"
-            >
-              <span>Segment Details</span>
-              <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[11px]">
-                25
-              </span>
-            </button>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-foreground flex cursor-pointer items-center gap-2 border-b-2 border-transparent pb-2 transition-all"
-            >
-              <span>Segment History</span>
-              <span className="bg-secondary text-muted-foreground rounded-full px-2 py-0.5 text-[11px]">
-                2
-              </span>
-            </button>
-          </div>
+          {hasSegmentsCreated ? (
+            <>
+              {/* Sub-Tabs Row */}
+              <div className="border-border flex items-center gap-6 border-b pb-2 text-xs font-semibold">
+                <button
+                  type="button"
+                  className="border-primary text-primary flex cursor-pointer items-center gap-2 border-b-2 pb-2 font-bold transition-all"
+                >
+                  <span>Segment Details</span>
+                  <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[11px]">
+                    {mockSegmentsList.length}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="text-muted-foreground hover:text-foreground flex cursor-pointer items-center gap-2 border-b-2 border-transparent pb-2 transition-all"
+                >
+                  <span>Segment History</span>
+                  <span className="bg-secondary text-muted-foreground rounded-full px-2 py-0.5 text-[11px]">
+                    2
+                  </span>
+                </button>
+              </div>
 
-          {/* Segments Table Card */}
-          <Card className="bg-card border-border overflow-hidden rounded-xl shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[11px] font-bold tracking-wider uppercase">
-                    <th className="p-3.5">SEGMENT ID</th>
-                    <th className="p-3.5">SEGMENT NUMBER</th>
-                    <th className="p-3.5">START IMAGE ID</th>
-                    <th className="p-3.5">END IMAGE ID</th>
-                    <th className="p-3.5">IMAGE COUNT</th>
-                    <th className="p-3.5">PRODUCTION STATUS</th>
-                    <th className="p-3.5">QC STATUS</th>
-                    <th className="p-3.5">CREATED AT</th>
-                    <th className="p-3.5">UPDATED AT</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-border/60 divide-y font-mono">
-                  {mockSegmentsList.map((seg) => (
-                    <tr
-                      key={seg.id}
-                      className="hover:bg-secondary/20 transition-colors"
-                    >
-                      <td className="text-foreground p-3.5 font-mono font-bold">
-                        {seg.id}
-                      </td>
-                      <td className="text-foreground p-3.5 font-sans font-medium">
-                        {seg.number}
-                      </td>
-                      <td className="text-muted-foreground p-3.5 font-mono">
-                        {seg.startImg}
-                      </td>
-                      <td className="text-muted-foreground p-3.5 font-mono">
-                        {seg.endImg}
-                      </td>
-                      <td className="text-foreground p-3.5 font-sans font-bold">
-                        {seg.count}
-                      </td>
-                      <td className="p-3.5 font-sans">
-                        <span className="bg-secondary border-border text-muted-foreground rounded-full border px-2.5 py-0.5 text-[10px] font-bold">
-                          {seg.prodStatus}
-                        </span>
-                      </td>
-                      <td className="p-3.5 font-sans">
-                        <span className="bg-secondary border-border text-muted-foreground rounded-full border px-2.5 py-0.5 text-[10px] font-bold">
-                          {seg.qcStatus}
-                        </span>
-                      </td>
-                      <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
-                        {seg.createdAt}
-                      </td>
-                      <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
-                        {seg.updatedAt}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+              {/* Segments Table Card */}
+              <Card className="bg-card border-border overflow-hidden rounded-xl shadow-xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[10px] font-bold tracking-wider whitespace-nowrap uppercase">
+                        <th className="p-3.5 pl-6">SEGMENT ID</th>
+                        <th className="p-3.5">SEGMENT NUMBER</th>
+                        <th className="p-3.5">START SOURCE UNIT</th>
+                        <th className="p-3.5">END SOURCE UNIT</th>
+                        <th className="p-3.5">TOTAL SOURCE UNITS</th>
+                        <th className="p-3.5">PRODUCTION STATUS</th>
+                        <th className="p-3.5">QC STATUS</th>
+                        <th className="p-3.5">CREATED AT</th>
+                        <th className="p-3.5">LAST UPDATED</th>
+                        <th className="p-3.5 pr-6 text-right">ACTIONS</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-border/60 divide-y font-mono">
+                      {mockSegmentsList.map((seg) => (
+                        <tr
+                          key={seg.id}
+                          className="hover:bg-secondary/20 transition-colors"
+                        >
+                          <td className="text-foreground p-3.5 pl-6 font-mono font-bold">
+                            {seg.id}
+                          </td>
+                          <td className="text-foreground p-3.5 font-sans font-medium">
+                            {seg.number}
+                          </td>
+                          <td className="text-primary p-3.5 font-mono font-bold">
+                            {seg.startSourceUnit}
+                          </td>
+                          <td className="text-primary p-3.5 font-mono font-bold">
+                            {seg.endSourceUnit}
+                          </td>
+                          <td className="text-foreground p-3.5 font-sans font-bold">
+                            {seg.totalSourceUnits}
+                          </td>
+                          <td className="p-3.5 font-sans">
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold",
+                                seg.prodStatus === "COMPLETED"
+                                  ? "border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400"
+                                  : seg.prodStatus === "IN_PROGRESS"
+                                    ? "border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-400"
+                                    : "border-secondary bg-secondary text-muted-foreground",
+                              )}
+                            >
+                              {seg.prodStatus}
+                            </span>
+                          </td>
+                          <td className="p-3.5 font-sans">
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold",
+                                seg.qcStatus === "PASSED"
+                                  ? "border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400"
+                                  : "border-secondary bg-secondary text-muted-foreground",
+                              )}
+                            >
+                              {seg.qcStatus}
+                            </span>
+                          </td>
+                          <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
+                            {seg.createdAt}
+                          </td>
+                          <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
+                            {seg.lastUpdated}
+                          </td>
+                          <td className="p-3.5 pr-6 text-right whitespace-nowrap">
+                            <div className="inline-flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-muted-foreground hover:text-foreground h-7 w-7 cursor-pointer rounded-md"
+                                title="View"
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </>
+          ) : (
+            <Card className="bg-card border-border flex flex-col items-center justify-center rounded-xl p-12 text-center shadow-xs">
+              <div className="bg-primary/10 text-primary mb-3 flex h-12 w-12 items-center justify-center rounded-full">
+                <SplitSquareVertical className="h-6 w-6" />
+              </div>
+              <h3 className="text-foreground text-sm font-bold">
+                No Segments Created
+              </h3>
+              <p className="text-muted-foreground mt-1 max-w-sm text-xs">
+                Partition batch source units into discrete operational segments
+                for allocation and tracking.
+              </p>
+              <Button
+                onClick={() => setIsRecreateSegmentOpen(true)}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground mt-4 cursor-pointer gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold shadow-xs"
+              >
+                <Plus className="h-3.5 w-3.5" /> Create Segment
+              </Button>
+            </Card>
+          )}
 
           {/* RECREATE SEGMENTS DIALOG MODAL */}
           <Dialog
@@ -897,10 +1120,16 @@ export function ProjectWorkspaceView() {
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => setIsRecreateSegmentOpen(false)}
+                  onClick={() => {
+                    setBatchSegmentsCreatedMap((prev) => ({
+                      ...prev,
+                      [selectedBatch.id || selectedBatch.batchCode]: true,
+                    }));
+                    setIsRecreateSegmentOpen(false);
+                  }}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground h-9 cursor-pointer gap-1.5 rounded-lg px-4 text-xs font-semibold shadow-xs"
                 >
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Confirm & Recreate
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Confirm & Proceed
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -912,34 +1141,81 @@ export function ProjectWorkspaceView() {
     /* Dedicated New Screen for Module 4: Production Allocation */
     if (activeModuleId === 4) {
       const batchCodeLower = selectedBatch.batchCode.toLowerCase();
-      const mockUnassignedList = Array.from({ length: 10 }, (_, idx) => {
-        const num = idx + 2;
-        const padNum = num < 10 ? `0${num}` : `${num}`;
-        const startImg = (idx + 1) * 20 + 1;
-        const endImg = (idx + 2) * 20;
-        const padStart =
-          startImg < 10
-            ? `00${startImg}`
-            : startImg < 100
-              ? `0${startImg}`
-              : `${startImg}`;
-        const padEnd =
-          endImg < 10
-            ? `00${endImg}`
-            : endImg < 100
-              ? `0${endImg}`
-              : `${endImg}`;
 
-        return {
-          id: `seg-${batchCodeLower}-${padNum}`,
-          number: `Segment ${num}`,
-          startImg: `img-${batchCodeLower}-${padStart}`,
-          endImg: `img-${batchCodeLower}-${padEnd}`,
-          count: "20 images",
+      const mockUnassignedList = [
+        {
+          id: `seg-${batchCodeLower}-02`,
+          number: "Segment 2",
+          startSourceUnit: `SU-${batchCodeLower}-021`,
+          endSourceUnit: `SU-${batchCodeLower}-040`,
+          totalSourceUnits: "20 Source Units",
+          prodStatus: "REWORK_REQUIRED",
+          reworkNote: "Failed QC (3 critical typos in header dates)",
+          failedQCRef: `qcout-${batchCodeLower}-02`,
+          createdAt: "6 Sep 2026 12:15pm",
+        },
+        {
+          id: `seg-${batchCodeLower}-04`,
+          number: "Segment 4",
+          startSourceUnit: `SU-${batchCodeLower}-061`,
+          endSourceUnit: `SU-${batchCodeLower}-080`,
+          totalSourceUnits: "20 Source Units",
+          prodStatus: "UNASSIGNED",
           createdAt: "6 Sep 2026 12:10pm",
-          prodStatus: "PENDING",
-        };
-      });
+        },
+        {
+          id: `seg-${batchCodeLower}-05`,
+          number: "Segment 5",
+          startSourceUnit: `SU-${batchCodeLower}-081`,
+          endSourceUnit: `SU-${batchCodeLower}-100`,
+          totalSourceUnits: "20 Source Units",
+          prodStatus: "UNASSIGNED",
+          createdAt: "6 Sep 2026 12:10pm",
+        },
+      ];
+
+      const mockAllocationsList = [
+        {
+          id: `seg-${batchCodeLower}-01`,
+          number: "Segment 1",
+          startSourceUnit: `SU-${batchCodeLower}-001`,
+          endSourceUnit: `SU-${batchCodeLower}-020`,
+          totalSourceUnits: "20 Source Units",
+          employeeName: "Mathan Kumar",
+          employeeId: "EMP-001",
+          avatar: "M",
+          prodStatus: "ALLOCATED",
+          allocatedAt: "6 Sep 2026 09:30am",
+          lastUpdated: "6 Sep 2026 12:10pm",
+        },
+      ];
+
+      const mockHistoryList = [
+        {
+          id: "hist-01",
+          activity: "SEGMENT_ALLOCATED",
+          segmentId: `seg-${batchCodeLower}-01`,
+          details: `Segment 1 (SU-${batchCodeLower}-001 -> SU-${batchCodeLower}-020) allocated to Mathan Kumar (EMP-001).`,
+          allocatedBy: "Vikram Malhotra",
+          dateTime: "6 Sep 2026 09:30am",
+        },
+        {
+          id: "hist-02",
+          activity: "MULTIPLE_SEGMENTS_ALLOCATED",
+          segmentId: `seg-${batchCodeLower}-01`,
+          details: `Multiple segments (Segment 1, Segment 2, Segment 3) allocated to Mathan Kumar (EMP-001).`,
+          allocatedBy: "Vikram Malhotra",
+          dateTime: "6 Sep 2026 10:15am",
+        },
+        {
+          id: "hist-03",
+          activity: "SEGMENT_REALLOCATED",
+          segmentId: `seg-${batchCodeLower}-01`,
+          details: `Segment 1 reallocated from Mathan Kumar (EMP-001) to Anitha Roy (EMP-002).`,
+          allocatedBy: "Vikram Malhotra",
+          dateTime: "6 Sep 2026 12:10pm",
+        },
+      ];
 
       return (
         <div className="bg-background text-foreground min-h-screen w-full space-y-6 p-4 sm:p-6">
@@ -985,7 +1261,7 @@ export function ProjectWorkspaceView() {
               <Inbox className="h-4 w-4" />
               <span>Unassigned Segments</span>
               <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[11px]">
-                24
+                {mockUnassignedList.length}
               </span>
             </button>
 
@@ -1002,7 +1278,7 @@ export function ProjectWorkspaceView() {
               <UserCheck className="h-4 w-4" />
               <span>Production Allocations</span>
               <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[11px]">
-                1
+                {mockAllocationsList.length}
               </span>
             </button>
 
@@ -1027,15 +1303,14 @@ export function ProjectWorkspaceView() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[11px] font-bold tracking-wider uppercase">
+                    <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[10px] font-bold tracking-wider whitespace-nowrap uppercase">
                       <th className="p-3.5">SEGMENT ID</th>
                       <th className="p-3.5">SEGMENT NUMBER</th>
-                      <th className="p-3.5">IMAGE START ID</th>
-                      <th className="p-3.5">IMAGE END ID</th>
-                      <th className="p-3.5">IMAGE COUNT</th>
-                      <th className="p-3.5">SEGMENT CREATED AT</th>
+                      <th className="p-3.5">START SOURCE UNIT</th>
+                      <th className="p-3.5">END SOURCE UNIT</th>
+                      <th className="p-3.5">TOTAL SOURCE UNITS</th>
                       <th className="p-3.5">PRODUCTION STATUS</th>
-                      <th className="p-3.5 text-right">ACTION</th>
+                      <th className="p-3.5 text-right">ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody className="divide-border/60 divide-y font-mono">
@@ -1051,21 +1326,33 @@ export function ProjectWorkspaceView() {
                           {seg.number}
                         </td>
                         <td className="text-muted-foreground p-3.5 font-mono">
-                          {seg.startImg}
+                          {seg.startSourceUnit}
                         </td>
                         <td className="text-muted-foreground p-3.5 font-mono">
-                          {seg.endImg}
+                          {seg.endSourceUnit}
                         </td>
                         <td className="text-foreground p-3.5 font-sans font-bold">
-                          {seg.count}
-                        </td>
-                        <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
-                          {seg.createdAt}
+                          {seg.totalSourceUnits}
                         </td>
                         <td className="p-3.5 font-sans">
-                          <span className="bg-secondary border-border text-muted-foreground rounded-full border px-2.5 py-0.5 text-[10px] font-bold">
-                            {seg.prodStatus}
-                          </span>
+                          {seg.prodStatus === "REWORK_REQUIRED" ||
+                          seg.prodStatus === "REWORK REQUIRED" ? (
+                            <div className="space-y-1">
+                              <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-600 dark:border-red-800 dark:bg-red-950/40 dark:text-red-400">
+                                <span className="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                                Rework Required
+                              </span>
+                              {seg.reworkNote && (
+                                <span className="text-muted-foreground block font-sans text-[10px] italic">
+                                  {seg.reworkNote}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="bg-secondary border-border text-muted-foreground rounded-full border px-2.5 py-0.5 text-[10px] font-bold">
+                              {seg.prodStatus}
+                            </span>
+                          )}
                         </td>
                         <td className="p-3.5 text-right font-sans">
                           <Button
@@ -1093,86 +1380,93 @@ export function ProjectWorkspaceView() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[11px] font-bold tracking-wider uppercase">
+                    <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[10px] font-bold tracking-wider whitespace-nowrap uppercase">
                       <th className="p-3.5">SEGMENT ID</th>
                       <th className="p-3.5">SEGMENT NUMBER</th>
-                      <th className="p-3.5">IMAGE START ID</th>
-                      <th className="p-3.5">IMAGE END ID</th>
-                      <th className="p-3.5">IMAGE COUNT</th>
+                      <th className="p-3.5">START SOURCE UNIT</th>
+                      <th className="p-3.5">END SOURCE UNIT</th>
+                      <th className="p-3.5">TOTAL SOURCE UNITS</th>
                       <th className="p-3.5">PRODUCTION EMPLOYEE</th>
-                      <th className="p-3.5">STATUS</th>
-                      <th className="p-3.5">PRODUCTION ALLOCATED AT</th>
+                      <th className="p-3.5">PRODUCTION STATUS</th>
+                      <th className="p-3.5">ALLOCATED AT</th>
+                      <th className="p-3.5">LAST UPDATED</th>
                       <th className="p-3.5 text-right">ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody className="divide-border/60 divide-y">
-                    <tr className="hover:bg-secondary/20 transition-colors">
-                      <td className="text-foreground p-3.5 font-mono font-bold">
-                        seg-{selectedBatch.batchCode.toLowerCase()}-01
-                      </td>
-                      <td className="text-foreground p-3.5 font-medium">
-                        Segment 1
-                      </td>
-                      <td className="text-muted-foreground p-3.5 font-mono">
-                        img-{selectedBatch.batchCode.toLowerCase()}-001
-                      </td>
-                      <td className="text-muted-foreground p-3.5 font-mono">
-                        img-{selectedBatch.batchCode.toLowerCase()}-020
-                      </td>
-                      <td className="text-foreground p-3.5 font-bold">
-                        20 images
-                      </td>
-                      <td className="p-3.5">
-                        <div className="flex items-center gap-2">
-                          <div className="bg-primary/10 text-primary flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold">
-                            M
+                    {mockAllocationsList.map((alloc) => (
+                      <tr
+                        key={alloc.id}
+                        className="hover:bg-secondary/20 transition-colors"
+                      >
+                        <td className="text-foreground p-3.5 font-mono font-bold">
+                          {alloc.id}
+                        </td>
+                        <td className="text-foreground p-3.5 font-medium">
+                          {alloc.number}
+                        </td>
+                        <td className="text-muted-foreground p-3.5 font-mono">
+                          {alloc.startSourceUnit}
+                        </td>
+                        <td className="text-muted-foreground p-3.5 font-mono">
+                          {alloc.endSourceUnit}
+                        </td>
+                        <td className="text-foreground p-3.5 font-bold">
+                          {alloc.totalSourceUnits}
+                        </td>
+                        <td className="p-3.5">
+                          <div className="flex items-center gap-2">
+                            <div className="bg-primary/10 text-primary flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold">
+                              {alloc.avatar}
+                            </div>
+                            <div>
+                              <span className="text-foreground block leading-tight font-bold">
+                                {alloc.employeeName}
+                              </span>
+                              <span className="text-muted-foreground block font-mono text-[10px]">
+                                {alloc.employeeId}
+                              </span>
+                            </div>
                           </div>
-                          <div>
-                            <span className="text-foreground block leading-tight font-bold">
-                              Mathan Kumar
-                            </span>
-                            <span className="text-muted-foreground block font-mono text-[10px]">
-                              EMP-001
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-3.5">
-                        <span className="bg-primary/10 border-primary/20 text-primary inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold">
-                          <span className="bg-primary h-1.5 w-1.5 rounded-full"></span>
-                          Allocated
-                        </span>
-                      </td>
-                      <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
-                        Sep 01, 2026 09:30 AM
-                      </td>
-                      <td className="space-x-2 p-3.5 text-right whitespace-nowrap">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-border h-7 cursor-pointer gap-1.5 rounded-lg text-xs font-semibold"
-                        >
-                          <Eye className="h-3.5 w-3.5" /> View
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedSegmentForRealloc({
-                              id: `seg-${selectedBatch.batchCode.toLowerCase()}-01`,
-                              number: "Segment 1",
-                              startImg: `img-${selectedBatch.batchCode.toLowerCase()}-001`,
-                              endImg: `img-${selectedBatch.batchCode.toLowerCase()}-020`,
-                              count: "20 images",
-                            });
-                            setIsReallocateOpen(true);
-                          }}
-                          className="text-primary hover:bg-primary/10 h-7 cursor-pointer gap-1 text-xs font-semibold"
-                        >
-                          <RefreshCw className="h-3.5 w-3.5" /> Reallocate
-                        </Button>
-                      </td>
-                    </tr>
+                        </td>
+                        <td className="p-3.5">
+                          <span className="bg-primary/10 border-primary/20 text-primary inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold">
+                            <span className="bg-primary h-1.5 w-1.5 rounded-full"></span>
+                            Allocated
+                          </span>
+                        </td>
+                        <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
+                          {alloc.allocatedAt}
+                        </td>
+                        <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
+                          {alloc.lastUpdated}
+                        </td>
+                        <td className="space-x-2 p-3.5 text-right whitespace-nowrap">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedProdAllocForView(alloc);
+                              setIsViewProdAllocOpen(true);
+                            }}
+                            className="border-border h-7 cursor-pointer gap-1.5 rounded-lg text-xs font-semibold"
+                          >
+                            <Eye className="h-3.5 w-3.5" /> View
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedSegmentForRealloc(alloc);
+                              setIsReallocateOpen(true);
+                            }}
+                            className="text-primary hover:bg-primary/10 h-7 cursor-pointer gap-1 text-xs font-semibold"
+                          >
+                            <RefreshCw className="h-3.5 w-3.5" /> Reallocate
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -1194,28 +1488,169 @@ export function ProjectWorkspaceView() {
                     </tr>
                   </thead>
                   <tbody className="divide-border/60 divide-y">
-                    <tr className="hover:bg-secondary/20 transition-colors">
-                      <td className="text-primary p-3.5 font-mono font-bold">
-                        INITIAL_ALLOCATION
-                      </td>
-                      <td className="text-foreground p-3.5 font-mono font-bold">
-                        seg-{selectedBatch.batchCode.toLowerCase()}-01
-                      </td>
-                      <td className="text-foreground p-3.5 font-medium">
-                        Allocated segment #1 to Mathan Kumar (EMP-001).
-                      </td>
-                      <td className="text-foreground p-3.5 font-semibold">
-                        Vikram Malhotra
-                      </td>
-                      <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
-                        Sep 01, 2026 09:30 AM
-                      </td>
-                    </tr>
+                    {mockHistoryList.map((hist) => (
+                      <tr
+                        key={hist.id}
+                        className="hover:bg-secondary/20 transition-colors"
+                      >
+                        <td className="p-3.5 font-mono font-bold">
+                          <span
+                            className={cn(
+                              "inline-block rounded-md border px-2 py-0.5 text-[10px]",
+                              hist.activity === "SEGMENT_REALLOCATED"
+                                ? "border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                                : "border-primary/20 bg-primary/10 text-primary",
+                            )}
+                          >
+                            {hist.activity}
+                          </span>
+                        </td>
+                        <td className="text-foreground p-3.5 font-mono font-bold">
+                          {hist.segmentId}
+                        </td>
+                        <td className="text-foreground max-w-md p-3.5 font-medium">
+                          {hist.details}
+                        </td>
+                        <td className="text-foreground p-3.5 font-semibold">
+                          {hist.allocatedBy}
+                        </td>
+                        <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
+                          {hist.dateTime}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
             </Card>
           )}
+
+          {/* VIEW PRODUCTION ALLOCATION DETAILS MODAL */}
+          <Dialog
+            open={isViewProdAllocOpen}
+            onOpenChange={setIsViewProdAllocOpen}
+          >
+            <DialogContent className="bg-card border-border text-foreground max-w-2xl rounded-2xl p-6 sm:max-w-3xl">
+              <DialogHeader className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-primary bg-primary/10 border-primary/20 rounded-md border px-2.5 py-0.5 font-mono text-xs font-bold">
+                    {selectedProdAllocForView?.id || `seg-${batchCodeLower}-01`}
+                  </span>
+                  <DialogTitle className="text-foreground text-lg font-bold">
+                    Allocation Details
+                  </DialogTitle>
+                </div>
+                <DialogDescription className="text-muted-foreground text-xs">
+                  Detailed breakdown of the allocated production segment.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-5 py-2 text-xs">
+                <Card className="bg-secondary/30 border-border rounded-xl border p-4">
+                  <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-3">
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Segment ID
+                      </span>
+                      <span className="text-primary mt-0.5 block font-mono text-xs font-bold">
+                        {selectedProdAllocForView?.id ||
+                          `seg-${batchCodeLower}-01`}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Segment Number
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
+                        {selectedProdAllocForView?.number || "Segment 1"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Start Source Unit
+                      </span>
+                      <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
+                        {selectedProdAllocForView?.startSourceUnit ||
+                          `SU-${batchCodeLower}-001`}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        End Source Unit
+                      </span>
+                      <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
+                        {selectedProdAllocForView?.endSourceUnit ||
+                          `SU-${batchCodeLower}-020`}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Total Source Units
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
+                        {selectedProdAllocForView?.totalSourceUnits ||
+                          "20 Source Units"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Production Employee
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
+                        {selectedProdAllocForView?.employeeName ||
+                          "Mathan Kumar"}{" "}
+                        ({selectedProdAllocForView?.employeeId || "EMP-001"})
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Production Status
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
+                        {selectedProdAllocForView?.prodStatus || "ALLOCATED"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Allocated At
+                      </span>
+                      <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
+                        {selectedProdAllocForView?.allocatedAt ||
+                          "6 Sep 2026 09:30am"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Last Updated
+                      </span>
+                      <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
+                        {selectedProdAllocForView?.lastUpdated ||
+                          "6 Sep 2026 12:10pm"}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsViewProdAllocOpen(false)}
+                  className="border-border h-9 cursor-pointer rounded-lg px-4 text-xs font-semibold"
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {/* ALLOCATE PRODUCTION DIALOG MODAL */}
           <Dialog
@@ -1226,7 +1661,7 @@ export function ProjectWorkspaceView() {
               <DialogHeader className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="text-primary bg-primary/10 border-primary/20 rounded-md border px-2.5 py-0.5 font-mono text-xs font-bold">
-                    {selectedSegmentForAlloc?.id || "seg-batch-001-02"}
+                    {selectedSegmentForAlloc?.id || `seg-${batchCodeLower}-02`}
                   </span>
                   <DialogTitle className="text-foreground text-lg font-bold">
                     Allocate Production
@@ -1234,7 +1669,8 @@ export function ProjectWorkspaceView() {
                 </div>
                 <DialogDescription className="text-muted-foreground text-xs">
                   Assign the selected segment to an active and
-                  production-eligible operator.
+                  production-eligible employee. One employee can receive
+                  multiple segments.
                 </DialogDescription>
               </DialogHeader>
 
@@ -1252,7 +1688,8 @@ export function ProjectWorkspaceView() {
                           Segment ID
                         </span>
                         <span className="text-primary mt-0.5 block font-mono text-xs font-bold">
-                          {selectedSegmentForAlloc?.id || "seg-batch-001-02"}
+                          {selectedSegmentForAlloc?.id ||
+                            `seg-${batchCodeLower}-02`}
                         </span>
                       </div>
 
@@ -1261,40 +1698,37 @@ export function ProjectWorkspaceView() {
                           Segment No
                         </span>
                         <span className="text-foreground mt-0.5 block text-xs font-bold">
-                          #
-                          {selectedSegmentForAlloc?.number?.replace(
-                            "Segment ",
-                            "",
-                          ) || "2"}
+                          {selectedSegmentForAlloc?.number || "Segment 2"}
                         </span>
                       </div>
 
                       <div>
                         <span className="text-muted-foreground block text-[11px]">
-                          Start Image ID
+                          Start Source Unit
                         </span>
                         <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
-                          {selectedSegmentForAlloc?.startImg ||
-                            "img-batch-001-021"}
+                          {selectedSegmentForAlloc?.startSourceUnit ||
+                            `SU-${batchCodeLower}-021`}
                         </span>
                       </div>
 
                       <div>
                         <span className="text-muted-foreground block text-[11px]">
-                          End Image ID
+                          End Source Unit
                         </span>
                         <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
-                          {selectedSegmentForAlloc?.endImg ||
-                            "img-batch-001-040"}
+                          {selectedSegmentForAlloc?.endSourceUnit ||
+                            `SU-${batchCodeLower}-040`}
                         </span>
                       </div>
 
                       <div>
                         <span className="text-muted-foreground block text-[11px]">
-                          Image Count
+                          Total Source Units
                         </span>
                         <span className="text-foreground mt-0.5 block text-xs font-bold">
-                          {selectedSegmentForAlloc?.count || "20 images"}
+                          {selectedSegmentForAlloc?.totalSourceUnits ||
+                            "20 Source Units"}
                         </span>
                       </div>
                     </div>
@@ -1333,15 +1767,31 @@ export function ProjectWorkspaceView() {
                     </Select>
                   </div>
 
+                  {/* MULTI-SEGMENT ALLOCATION CAPABILITY NOTICE */}
+                  <div className="bg-primary/5 border-primary/20 rounded-xl border p-3.5 text-xs">
+                    <p className="text-foreground font-semibold">
+                      Allocation Rules Notice:
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-[11px]">
+                      One employee can be allocated multiple segments. At any
+                      given time, one segment has only one active Production
+                      employee.
+                    </p>
+                  </div>
+
                   {/* EMPLOYEE PREVIEW CARD */}
                   <Card className="bg-primary/5 border-primary/20 flex flex-col justify-between gap-3 rounded-xl border p-4 sm:flex-row sm:items-center">
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-primary font-mono text-xs font-bold">
-                          EMP-001
+                          {selectedProdEmployee}
                         </span>
                         <span className="text-foreground text-sm font-bold">
-                          Mathan Kumar
+                          {selectedProdEmployee === "EMP-001"
+                            ? "Mathan Kumar"
+                            : selectedProdEmployee === "EMP-002"
+                              ? "Anitha Roy"
+                              : "Priya Sharma"}
                         </span>
                       </div>
                       <span className="text-muted-foreground mt-0.5 block text-xs">
@@ -1355,9 +1805,6 @@ export function ProjectWorkspaceView() {
                     <div className="flex items-center gap-2">
                       <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
                         <Check className="h-3 w-3" /> Production Eligible
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
-                        <Check className="h-3 w-3" /> QC Eligible
                       </span>
                     </div>
                   </Card>
@@ -1388,15 +1835,17 @@ export function ProjectWorkspaceView() {
               <DialogHeader className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="text-primary bg-primary/10 border-primary/20 rounded-md border px-2.5 py-0.5 font-mono text-xs font-bold">
-                    {selectedSegmentForRealloc?.id || "seg-batch-001-01"}
+                    {selectedSegmentForRealloc?.id ||
+                      `seg-${batchCodeLower}-01`}
                   </span>
                   <DialogTitle className="text-foreground text-lg font-bold">
-                    Reallocate Production
+                    Reallocate Production Segment
                   </DialogTitle>
                 </div>
                 <DialogDescription className="text-muted-foreground text-xs">
-                  Reassign this active segment to a new production-eligible
-                  operator.
+                  Reallocate this segment to another eligible Production
+                  employee. Only one employee will remain actively assigned to
+                  the segment.
                 </DialogDescription>
               </DialogHeader>
 
@@ -1414,7 +1863,8 @@ export function ProjectWorkspaceView() {
                           Segment ID
                         </span>
                         <span className="text-primary mt-0.5 block font-mono text-xs font-bold">
-                          {selectedSegmentForRealloc?.id || "seg-batch-001-01"}
+                          {selectedSegmentForRealloc?.id ||
+                            `seg-${batchCodeLower}-01`}
                         </span>
                       </div>
 
@@ -1423,40 +1873,37 @@ export function ProjectWorkspaceView() {
                           Segment No
                         </span>
                         <span className="text-foreground mt-0.5 block text-xs font-bold">
-                          #
-                          {selectedSegmentForRealloc?.number?.replace(
-                            "Segment ",
-                            "",
-                          ) || "1"}
+                          {selectedSegmentForRealloc?.number || "Segment 1"}
                         </span>
                       </div>
 
                       <div>
                         <span className="text-muted-foreground block text-[11px]">
-                          Start Image ID
+                          Start Source Unit
                         </span>
                         <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
-                          {selectedSegmentForRealloc?.startImg ||
-                            "img-batch-001-001"}
+                          {selectedSegmentForRealloc?.startSourceUnit ||
+                            `SU-${batchCodeLower}-001`}
                         </span>
                       </div>
 
                       <div>
                         <span className="text-muted-foreground block text-[11px]">
-                          End Image ID
+                          End Source Unit
                         </span>
                         <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
-                          {selectedSegmentForRealloc?.endImg ||
-                            "img-batch-001-020"}
+                          {selectedSegmentForRealloc?.endSourceUnit ||
+                            `SU-${batchCodeLower}-020`}
                         </span>
                       </div>
 
                       <div>
                         <span className="text-muted-foreground block text-[11px]">
-                          Image Count
+                          Total Source Units
                         </span>
                         <span className="text-foreground mt-0.5 block text-xs font-bold">
-                          {selectedSegmentForRealloc?.count || "20 images"}
+                          {selectedSegmentForRealloc?.totalSourceUnits ||
+                            "20 Source Units"}
                         </span>
                       </div>
                     </div>
@@ -1482,47 +1929,30 @@ export function ProjectWorkspaceView() {
                         <SelectValue placeholder="Select Production Employee" />
                       </SelectTrigger>
                       <SelectContent className="bg-card border-border text-xs">
-                        <SelectItem value="EMP-001">
-                          Mathan Kumar (EMP-001) &mdash; Data Processing
-                        </SelectItem>
                         <SelectItem value="EMP-002">
                           Anitha Roy (EMP-002) &mdash; Data Processing
                         </SelectItem>
                         <SelectItem value="EMP-003">
                           Priya Sharma (EMP-003) &mdash; Annotation Team
                         </SelectItem>
+                        <SelectItem value="EMP-001">
+                          Mathan Kumar (EMP-001) &mdash; Data Processing
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  {/* EMPLOYEE PREVIEW CARD */}
-                  <Card className="bg-primary/5 border-primary/20 flex flex-col justify-between gap-3 rounded-xl border p-4 sm:flex-row sm:items-center">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-primary font-mono text-xs font-bold">
-                          EMP-002
-                        </span>
-                        <span className="text-foreground text-sm font-bold">
-                          Anitha Roy
-                        </span>
-                      </div>
-                      <span className="text-muted-foreground mt-0.5 block text-xs">
-                        Department:{" "}
-                        <strong className="text-foreground font-semibold">
-                          Data Processing
-                        </strong>
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                        <Check className="h-3 w-3" /> Production Eligible
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
-                        <Check className="h-3 w-3" /> QC Eligible
-                      </span>
-                    </div>
-                  </Card>
+                  {/* REALLOCATION NOTICE */}
+                  <div className="bg-primary/5 border-primary/20 rounded-xl border p-3.5 text-xs">
+                    <p className="text-foreground font-semibold">
+                      Reallocation Notice:
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-[11px]">
+                      Reallocating will update the assigned Production employee
+                      and timestamp. Only one employee will remain actively
+                      assigned to this segment.
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -1554,94 +1984,76 @@ export function ProjectWorkspaceView() {
         {
           id: `seg-${batchCodeLower}-01`,
           number: "Segment 1",
-          startImg: `img-${batchCodeLower}-001`,
-          endImg: `img-${batchCodeLower}-020`,
-          count: "20 Images",
+          startSourceUnit: `SU-${batchCodeLower}-001`,
+          endSourceUnit: `SU-${batchCodeLower}-020`,
+          totalSourceUnits: "20 Source Units",
           empName: "Mathan Kumar",
           empId: "EMP-001",
           avatar: "M",
-          progress: "20/20",
-          totalRecords: "500",
-          status: "Completed",
-          allocatedAt: "6 Sep 2026 10:30am",
-          startAt: "6 Sep 2026 10:35am",
-          fileName: `SEG-${selectedBatch.batchCode}-01_product...`,
+          sourceProcessed: "20 / 20",
+          recordsEntered: 350,
+          workStatus: "Completed",
+          outputFileName: `SEG-${selectedBatch.batchCode}-01_output.csv`,
+          outputFile: `SEG-${selectedBatch.batchCode}-01_output.csv`,
           completedAt: "6 Sep 2026 10:30am",
-          updatedAt: "6 Sep 2026 10:30am",
+          lastUpdated: "6 Sep 2026 10:30am",
         },
         {
           id: `seg-${batchCodeLower}-02`,
           number: "Segment 2",
-          startImg: `img-${batchCodeLower}-021`,
-          endImg: `img-${batchCodeLower}-040`,
-          count: "20 Images",
-          empName: "Ananya Sharma",
-          empId: "EMP-1002",
+          startSourceUnit: `SU-${batchCodeLower}-021`,
+          endSourceUnit: `SU-${batchCodeLower}-040`,
+          totalSourceUnits: "20 Source Units",
+          empName: "Anitha Roy",
+          empId: "EMP-002",
           avatar: "A",
-          progress: "20/20",
-          totalRecords: "500",
-          status: "Completed",
-          allocatedAt: "6 Sep 2026 10:30am",
-          startAt: "6 Sep 2026 10:35am",
-          fileName: `SEG-${selectedBatch.batchCode}-02_product...`,
-          completedAt: "6 Sep 2026 10:30am",
-          updatedAt: "6 Sep 2026 10:30am",
+          sourceProcessed: "20 / 20",
+          recordsEntered: 420,
+          workStatus: "Completed",
+          outputFileName: `SEG-${selectedBatch.batchCode}-02_output.csv`,
+          outputFile: `SEG-${selectedBatch.batchCode}-02_output.csv`,
+          completedAt: "6 Sep 2026 11:15am",
+          lastUpdated: "6 Sep 2026 11:15am",
         },
         {
           id: `seg-${batchCodeLower}-03`,
           number: "Segment 3",
-          startImg: `img-${batchCodeLower}-041`,
-          endImg: `img-${batchCodeLower}-060`,
-          count: "20 Images",
-          empName: "John Doe",
-          empId: "EMP-1003",
-          avatar: "J",
-          progress: "10/20",
-          totalRecords: "500",
-          status: "In Progress",
-          allocatedAt: "6 Sep 2026 10:30am",
-          startAt: "6 Sep 2026 10:35am",
-          fileName: `SEG-${selectedBatch.batchCode}-03_product...`,
-          completedAt: "6 Sep 2026 10:30am",
-          updatedAt: "6 Sep 2026 10:30am",
+          startSourceUnit: `SU-${batchCodeLower}-041`,
+          endSourceUnit: `SU-${batchCodeLower}-060`,
+          totalSourceUnits: "20 Source Units",
+          empName: "Priya Sharma",
+          empId: "EMP-003",
+          avatar: "P",
+          sourceProcessed: "10 / 20",
+          recordsEntered: 180,
+          workStatus: "In Progress",
+          outputFileName: "-",
+          outputFile: "-",
+          completedAt: "-",
+          lastUpdated: "6 Sep 2026 12:10pm",
         },
         {
           id: `seg-${batchCodeLower}-04`,
           number: "Segment 4",
-          startImg: `img-${batchCodeLower}-061`,
-          endImg: `img-${batchCodeLower}-080`,
-          count: "20 Images",
-          empName: "Ananya Sharma",
-          empId: "EMP-1004",
-          avatar: "A",
-          progress: "10/20",
-          totalRecords: "500",
-          status: "In Progress",
-          allocatedAt: "6 Sep 2026 10:30am",
-          startAt: "6 Sep 2026 10:35am",
-          fileName: `SEG-${selectedBatch.batchCode}-04_product...`,
-          completedAt: "6 Sep 2026 10:30am",
-          updatedAt: "6 Sep 2026 10:30am",
-        },
-        {
-          id: `seg-${batchCodeLower}-05`,
-          number: "Segment 5",
-          startImg: `img-${batchCodeLower}-081`,
-          endImg: `img-${batchCodeLower}-100`,
-          count: "20 Images",
-          empName: "John Doe",
-          empId: "EMP-1005",
-          avatar: "J",
-          progress: "10/20",
-          totalRecords: "500",
-          status: "In Progress",
-          allocatedAt: "6 Sep 2026 10:30am",
-          startAt: "6 Sep 2026 10:35am",
-          fileName: `SEG-${selectedBatch.batchCode}-05_product...`,
-          completedAt: "6 Sep 2026 10:30am",
-          updatedAt: "6 Sep 2026 10:30am",
+          startSourceUnit: `SU-${batchCodeLower}-061`,
+          endSourceUnit: `SU-${batchCodeLower}-080`,
+          totalSourceUnits: "20 Source Units",
+          empName: "Mathan Kumar",
+          empId: "EMP-001",
+          avatar: "M",
+          sourceProcessed: "5 / 20",
+          recordsEntered: 85,
+          workStatus: "In Progress",
+          outputFileName: "-",
+          outputFile: "-",
+          completedAt: "-",
+          lastUpdated: "6 Sep 2026 09:30am",
         },
       ];
+
+      const completedOutputs = mockTrackingList.filter(
+        (item) => item.workStatus === "Completed",
+      );
 
       return (
         <div className="bg-background text-foreground min-h-screen w-full space-y-6 p-4 sm:p-6">
@@ -1668,8 +2080,8 @@ export function ProjectWorkspaceView() {
               </Badge>
             </div>
             <p className="text-muted-foreground mt-1 text-xs">
-              Real-time operator throughput speeds, elapsed production hours,
-              and verified production output packages.
+              Real-time operator throughput speeds, work status tracking, and
+              verified production output packages.
             </p>
           </div>
 
@@ -1687,7 +2099,7 @@ export function ProjectWorkspaceView() {
               </div>
               <div>
                 <span className="text-foreground block text-3xl font-extrabold tracking-tight">
-                  25
+                  3
                 </span>
                 <span className="text-muted-foreground mt-1 block text-xs font-medium">
                   Employees active on this batch
@@ -1695,11 +2107,11 @@ export function ProjectWorkspaceView() {
               </div>
             </Card>
 
-            {/* Card 2: PROCESSED IMAGES */}
+            {/* Card 2: PROCESSED SOURCE UNITS */}
             <Card className="bg-card border-border flex flex-col justify-between space-y-4 rounded-xl p-5 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
-                  PROCESSED IMAGES
+                  PROCESSED SOURCE UNITS
                 </span>
                 <div className="bg-primary/10 text-primary flex h-9 w-9 items-center justify-center rounded-lg">
                   <Activity className="h-4 w-4" />
@@ -1707,10 +2119,10 @@ export function ProjectWorkspaceView() {
               </div>
               <div>
                 <span className="text-foreground block text-3xl font-extrabold tracking-tight">
-                  270 / 500
+                  55 / 80
                 </span>
                 <span className="mt-1 flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                  <span>↗ 54%</span> completed
+                  <span>↗ 68.75%</span> completed
                 </span>
               </div>
             </Card>
@@ -1727,10 +2139,10 @@ export function ProjectWorkspaceView() {
               </div>
               <div>
                 <span className="text-foreground block text-3xl font-extrabold tracking-tight">
-                  2
+                  {completedOutputs.length}
                 </span>
                 <span className="text-muted-foreground mt-1 block text-xs font-medium">
-                  Out of 25 segments
+                  Out of {mockTrackingList.length} segments
                 </span>
               </div>
             </Card>
@@ -1749,9 +2161,9 @@ export function ProjectWorkspaceView() {
               )}
             >
               <Activity className="h-4 w-4" />
-              <span>Production Tracking List</span>
+              <span>Production Tracking</span>
               <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[11px]">
-                25
+                {mockTrackingList.length}
               </span>
             </button>
 
@@ -1768,7 +2180,7 @@ export function ProjectWorkspaceView() {
               <FileText className="h-4 w-4" />
               <span>Production Output</span>
               <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[11px]">
-                25
+                {completedOutputs.length}
               </span>
             </button>
           </div>
@@ -1779,15 +2191,15 @@ export function ProjectWorkspaceView() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-foreground text-xs font-bold tracking-wider uppercase">
-                    PRODUCTION TRACKING LIST
+                    PRODUCTION TRACKING
                   </h2>
                   <p className="text-muted-foreground mt-0.5 text-xs">
-                    Total Images progress displayed as Processed Images / Total
-                    Images (e.g. 10/20).
+                    Real-time operational tracking of segment workload and
+                    entered record counts.
                   </p>
                 </div>
                 <Badge className="bg-primary/10 text-primary border-primary/20 rounded-full border px-3 py-0.5 text-xs font-semibold">
-                  25 Segments
+                  {mockTrackingList.length} Segments
                 </Badge>
               </div>
 
@@ -1795,143 +2207,18 @@ export function ProjectWorkspaceView() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[11px] font-bold tracking-wider uppercase">
+                      <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[10px] font-bold tracking-wider whitespace-nowrap uppercase">
                         <th className="p-3.5">SEGMENT ID</th>
                         <th className="p-3.5">SEGMENT NUMBER</th>
-                        <th className="p-3.5">IMAGE START ID</th>
-                        <th className="p-3.5">IMAGE END ID</th>
-                        <th className="p-3.5">IMAGE COUNT</th>
+                        <th className="p-3.5">START SOURCE UNIT</th>
+                        <th className="p-3.5">END SOURCE UNIT</th>
+                        <th className="p-3.5">TOTAL SOURCE UNITS</th>
                         <th className="p-3.5">PRODUCTION EMPLOYEE</th>
-                        <th className="p-3.5">IMAGE PROGRESS</th>
-                        <th className="p-3.5">TOTAL RECORDS</th>
-                        <th className="p-3.5">STATUS</th>
+                        <th className="p-3.5">SOURCE PROCESSED</th>
+                        <th className="p-3.5">RECORDS ENTERED</th>
+                        <th className="p-3.5">WORK STATUS</th>
                         <th className="p-3.5 whitespace-nowrap">
-                          PRODUCTION ALLOCATED AT
-                        </th>
-                        <th className="p-3.5 whitespace-nowrap">
-                          PRODUCTION START AT
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-border/60 divide-y font-mono">
-                      {mockTrackingList.map((item) => {
-                        const isDone = item.status === "Completed";
-                        return (
-                          <tr
-                            key={item.id}
-                            className="hover:bg-secondary/20 transition-colors"
-                          >
-                            <td className="text-foreground p-3.5 font-mono font-bold">
-                              {item.id}
-                            </td>
-                            <td className="text-foreground p-3.5 font-sans font-medium">
-                              {item.number}
-                            </td>
-                            <td className="text-muted-foreground p-3.5 font-mono">
-                              {item.startImg}
-                            </td>
-                            <td className="text-muted-foreground p-3.5 font-mono">
-                              {item.endImg}
-                            </td>
-                            <td className="text-foreground p-3.5 font-sans font-bold">
-                              {item.count}
-                            </td>
-                            <td className="p-3.5 font-sans">
-                              <div className="flex items-center gap-2">
-                                <div className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold">
-                                  {item.avatar}
-                                </div>
-                                <div>
-                                  <span className="text-foreground block leading-tight font-bold">
-                                    {item.empName}
-                                  </span>
-                                  <span className="text-muted-foreground block font-mono text-[10px]">
-                                    {item.empId}
-                                  </span>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="p-3.5 font-sans">
-                              <span
-                                className={cn(
-                                  "rounded-full border px-2.5 py-0.5 text-xs font-bold",
-                                  isDone
-                                    ? "bg-primary/10 text-primary border-primary/20"
-                                    : "border-purple-200 bg-purple-50 text-purple-600 dark:bg-purple-950/40",
-                                )}
-                              >
-                                {item.progress}
-                              </span>
-                            </td>
-                            <td className="text-foreground p-3.5 font-mono font-bold">
-                              {item.totalRecords}
-                            </td>
-                            <td className="p-3.5 font-sans">
-                              {isDone ? (
-                                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                  Completed
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-2.5 py-0.5 text-[11px] font-bold text-purple-600 dark:bg-purple-950/40 dark:text-purple-400">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-purple-500"></span>
-                                  In Progress
-                                </span>
-                              )}
-                            </td>
-                            <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
-                              {item.allocatedAt}
-                            </td>
-                            <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
-                              {item.startAt}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
-            </div>
-          )}
-
-          {/* SUB-TAB 2: PRODUCTION OUTPUT */}
-          {prodTrackingTab === "output" && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-foreground text-xs font-bold tracking-wider uppercase">
-                    PRODUCTION OUTPUT
-                  </h2>
-                  <p className="text-muted-foreground mt-0.5 text-xs">
-                    Verified digital production packages with upload timestamps
-                    in 12-hour format.
-                  </p>
-                </div>
-                <Badge className="bg-primary/10 text-primary border-primary/20 rounded-full border px-3 py-0.5 text-xs font-semibold">
-                  25 Files
-                </Badge>
-              </div>
-
-              <Card className="bg-card border-border overflow-hidden rounded-xl shadow-xs">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[11px] font-bold tracking-wider uppercase">
-                        <th className="p-3.5">SEGMENT ID</th>
-                        <th className="p-3.5">SEGMENT NUMBER</th>
-                        <th className="p-3.5">IMAGE START ID</th>
-                        <th className="p-3.5">IMAGE END ID</th>
-                        <th className="p-3.5">IMAGE COUNT</th>
-                        <th className="p-3.5">PRODUCTION EMPLOYEE</th>
-                        <th className="p-3.5">TOTAL RECORDS</th>
-                        <th className="p-3.5">PRODUCTION FILE</th>
-                        <th className="p-3.5">STATUS</th>
-                        <th className="p-3.5 whitespace-nowrap">
-                          PRODUCTION COMPLETED AT
-                        </th>
-                        <th className="p-3.5 whitespace-nowrap">
-                          PRODUCTION UPDATED AT
+                          LAST UPDATED
                         </th>
                       </tr>
                     </thead>
@@ -1948,13 +2235,130 @@ export function ProjectWorkspaceView() {
                             {item.number}
                           </td>
                           <td className="text-muted-foreground p-3.5 font-mono">
-                            {item.startImg}
+                            {item.startSourceUnit}
                           </td>
                           <td className="text-muted-foreground p-3.5 font-mono">
-                            {item.endImg}
+                            {item.endSourceUnit}
                           </td>
                           <td className="text-foreground p-3.5 font-sans font-bold">
-                            {item.count}
+                            {item.totalSourceUnits}
+                          </td>
+                          <td className="p-3.5 font-sans">
+                            <div className="flex items-center gap-2">
+                              <div className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold">
+                                {item.avatar}
+                              </div>
+                              <div>
+                                <span className="text-foreground block leading-tight font-bold">
+                                  {item.empName}
+                                </span>
+                                <span className="text-muted-foreground block font-mono text-[10px]">
+                                  {item.empId}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="text-foreground p-3.5 font-mono font-semibold">
+                            {item.sourceProcessed}
+                          </td>
+                          <td className="text-foreground p-3.5 font-mono font-bold">
+                            {item.recordsEntered}
+                          </td>
+                          <td className="p-3.5 font-sans">
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold",
+                                item.workStatus === "Completed"
+                                  ? "border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400"
+                                  : "border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-400",
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  "h-1.5 w-1.5 rounded-full",
+                                  item.workStatus === "Completed"
+                                    ? "bg-emerald-500"
+                                    : "bg-blue-500",
+                                )}
+                              ></span>
+                              {item.workStatus}
+                            </span>
+                          </td>
+                          <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
+                            {item.lastUpdated}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* SUB-TAB 2: PRODUCTION OUTPUT */}
+          {prodTrackingTab === "output" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-foreground text-xs font-bold tracking-wider uppercase">
+                    PRODUCTION OUTPUT
+                  </h2>
+                  <p className="text-muted-foreground mt-0.5 text-xs">
+                    Submitted production output files ready for quality control
+                    verification.
+                  </p>
+                </div>
+                <Badge className="bg-primary/10 text-primary border-primary/20 rounded-full border px-3 py-0.5 text-xs font-semibold">
+                  {completedOutputs.length} Records
+                </Badge>
+              </div>
+
+              <Card className="bg-card border-border overflow-hidden rounded-xl shadow-xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[10px] font-bold tracking-wider whitespace-nowrap uppercase">
+                        <th className="p-3.5">SEGMENT ID</th>
+                        <th className="p-3.5">SEGMENT NUMBER</th>
+                        <th className="p-3.5">START SOURCE UNIT</th>
+                        <th className="p-3.5">END SOURCE UNIT</th>
+                        <th className="p-3.5">TOTAL SOURCE UNITS</th>
+                        <th className="p-3.5">PRODUCTION EMPLOYEE</th>
+                        <th className="p-3.5">RECORDS ENTERED</th>
+                        <th className="p-3.5">PRODUCTION FILE</th>
+                        <th className="p-3.5">WORK STATUS</th>
+                        <th className="p-3.5 whitespace-nowrap">
+                          COMPLETED AT
+                        </th>
+                        <th className="p-3.5 whitespace-nowrap">
+                          LAST UPDATED
+                        </th>
+                        <th className="p-3.5 text-right whitespace-nowrap">
+                          ACTION
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-border/60 divide-y font-mono">
+                      {completedOutputs.map((item) => (
+                        <tr
+                          key={item.id}
+                          className="hover:bg-secondary/20 transition-colors"
+                        >
+                          <td className="text-foreground p-3.5 font-mono font-bold">
+                            {item.id}
+                          </td>
+                          <td className="text-foreground p-3.5 font-sans font-medium">
+                            {item.number}
+                          </td>
+                          <td className="text-muted-foreground p-3.5 font-mono">
+                            {item.startSourceUnit}
+                          </td>
+                          <td className="text-muted-foreground p-3.5 font-mono">
+                            {item.endSourceUnit}
+                          </td>
+                          <td className="text-foreground p-3.5 font-sans font-bold">
+                            {item.totalSourceUnits}
                           </td>
                           <td className="p-3.5 font-sans">
                             <div className="flex items-center gap-2">
@@ -1972,13 +2376,20 @@ export function ProjectWorkspaceView() {
                             </div>
                           </td>
                           <td className="text-foreground p-3.5 font-mono font-bold">
-                            {item.totalRecords}
+                            {item.recordsEntered}
                           </td>
-                          <td className="text-foreground p-3.5 font-mono font-bold uppercase">
-                            {item.fileName}
+                          <td className="p-3.5 font-mono">
+                            {item.outputFile !== "-" ? (
+                              <span className="text-primary inline-flex cursor-pointer items-center gap-1 font-semibold hover:underline">
+                                <FileText className="h-3.5 w-3.5" />
+                                {item.outputFile}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
                           </td>
                           <td className="p-3.5 font-sans">
-                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
                               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                               Completed
                             </span>
@@ -1987,7 +2398,21 @@ export function ProjectWorkspaceView() {
                             {item.completedAt}
                           </td>
                           <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
-                            {item.updatedAt}
+                            {item.lastUpdated}
+                          </td>
+                          <td className="p-3.5 text-right font-sans whitespace-nowrap">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedProdOutputForView(item);
+                                setIsViewProdOutputOpen(true);
+                              }}
+                              className="border-border h-7 cursor-pointer gap-1.5 rounded-lg px-2.5 text-xs font-semibold"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              View
+                            </Button>
                           </td>
                         </tr>
                       ))}
@@ -1997,6 +2422,72 @@ export function ProjectWorkspaceView() {
               </Card>
             </div>
           )}
+
+          {/* VIEW PRODUCTION OUTPUT MODAL */}
+          <Dialog
+            open={isViewProdOutputOpen}
+            onOpenChange={setIsViewProdOutputOpen}
+          >
+            <DialogContent className="bg-card border-border text-foreground max-w-md rounded-2xl p-6">
+              <DialogHeader className="space-y-2">
+                <DialogTitle className="text-foreground text-lg font-bold">
+                  Production Output File
+                </DialogTitle>
+                <DialogDescription className="text-muted-foreground text-xs">
+                  {selectedProdOutputForView?.outputFileName ||
+                    selectedProdOutputForView?.outputFile ||
+                    "production_output.csv"}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="py-4 text-xs">
+                <div className="bg-secondary/30 border-border rounded-xl border p-4 font-mono">
+                  <div className="flex items-center gap-2">
+                    <FileText className="text-primary h-5 w-5" />
+                    <span className="text-foreground font-bold">
+                      {selectedProdOutputForView?.outputFileName ||
+                        selectedProdOutputForView?.outputFile ||
+                        "production_output.csv"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter className="flex items-center justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    alert(
+                      `Opening ${
+                        selectedProdOutputForView?.outputFileName ||
+                        selectedProdOutputForView?.outputFile ||
+                        "production_output.csv"
+                      }`,
+                    );
+                  }}
+                  className="border-border h-9 cursor-pointer gap-1.5 rounded-lg px-4 text-xs font-semibold"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  Open
+                </Button>
+                <Button
+                  onClick={() => {
+                    alert(
+                      `Downloading ${
+                        selectedProdOutputForView?.outputFileName ||
+                        selectedProdOutputForView?.outputFile ||
+                        "production_output.csv"
+                      }`,
+                    );
+                  }}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground h-9 cursor-pointer gap-1.5 rounded-lg px-4 text-xs font-semibold"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Download
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       );
     }
@@ -2008,62 +2499,41 @@ export function ProjectWorkspaceView() {
         {
           id: `seg-${batchCodeLower}-01`,
           number: "Segment 1",
-          startImg: `img-${batchCodeLower}-001`,
-          endImg: `img-${batchCodeLower}-020`,
-          count: "20 images",
+          startSourceUnit: `SU-${batchCodeLower}-001`,
+          endSourceUnit: `SU-${batchCodeLower}-020`,
+          totalSourceUnits: "20 Source Units",
+          totalRecords: 350,
           operator: "Mathan Kumar",
           operatorId: "EMP-001",
+          productionOutput: `SEG-${selectedBatch.batchCode}-01_output.csv`,
           completedAt: "6 Sep 2026 10:30am",
-          accuracy: "99.4%",
-          status: "Awaiting QC",
+          qcStatus: "Pending",
         },
         {
           id: `seg-${batchCodeLower}-02`,
           number: "Segment 2",
-          startImg: `img-${batchCodeLower}-021`,
-          endImg: `img-${batchCodeLower}-040`,
-          count: "20 images",
-          operator: "Ananya Sharma",
+          startSourceUnit: `SU-${batchCodeLower}-021`,
+          endSourceUnit: `SU-${batchCodeLower}-040`,
+          totalSourceUnits: "20 Source Units",
+          totalRecords: 420,
+          operator: "Anitha Roy",
           operatorId: "EMP-002",
+          productionOutput: `SEG-${selectedBatch.batchCode}-02_output.csv`,
           completedAt: "6 Sep 2026 10:45am",
-          accuracy: "98.8%",
-          status: "Awaiting QC",
+          qcStatus: "Pending",
         },
         {
           id: `seg-${batchCodeLower}-03`,
           number: "Segment 3",
-          startImg: `img-${batchCodeLower}-041`,
-          endImg: `img-${batchCodeLower}-060`,
-          count: "20 images",
-          operator: "Rajesh V",
+          startSourceUnit: `SU-${batchCodeLower}-041`,
+          endSourceUnit: `SU-${batchCodeLower}-060`,
+          totalSourceUnits: "20 Source Units",
+          totalRecords: 180,
+          operator: "Priya Sharma",
           operatorId: "EMP-003",
+          productionOutput: `SEG-${selectedBatch.batchCode}-03_output.csv`,
           completedAt: "6 Sep 2026 11:15am",
-          accuracy: "100%",
-          status: "Awaiting QC",
-        },
-        {
-          id: `seg-${batchCodeLower}-04`,
-          number: "Segment 4",
-          startImg: `img-${batchCodeLower}-061`,
-          endImg: `img-${batchCodeLower}-080`,
-          count: "20 images",
-          operator: "Suresh Prabhu",
-          operatorId: "EMP-004",
-          completedAt: "6 Sep 2026 11:40am",
-          accuracy: "99.1%",
-          status: "Awaiting QC",
-        },
-        {
-          id: `seg-${batchCodeLower}-05`,
-          number: "Segment 5",
-          startImg: `img-${batchCodeLower}-081`,
-          endImg: `img-${batchCodeLower}-100`,
-          count: "20 images",
-          operator: "Deepa Nair",
-          operatorId: "EMP-008",
-          completedAt: "6 Sep 2026 12:05pm",
-          accuracy: "99.7%",
-          status: "Awaiting QC",
+          qcStatus: "Pending",
         },
       ];
 
@@ -2071,81 +2541,61 @@ export function ProjectWorkspaceView() {
         {
           id: `seg-${batchCodeLower}-06`,
           number: "Segment 6",
-          startImg: `img-${batchCodeLower}-101`,
-          endImg: `img-${batchCodeLower}-120`,
-          count: "20 images",
+          startSourceUnit: `SU-${batchCodeLower}-101`,
+          endSourceUnit: `SU-${batchCodeLower}-120`,
+          totalSourceUnits: "20 Source Units",
+          totalRecords: 380,
+          operator: "Mathan Kumar",
+          operatorId: "EMP-001",
+          productionOutput: `SEG-${selectedBatch.batchCode}-06_output.csv`,
           qcSpecialist: "Anitha Roy",
           qcEmpId: "EMP-005",
+          qcStatus: "Allocated",
           allocatedAt: "6 Sep 2026 11:30am",
-          dueDate: "6 Sep 2026 04:00pm",
-          status: "In QC Review",
+          lastUpdated: "6 Sep 2026 12:10pm",
         },
         {
           id: `seg-${batchCodeLower}-07`,
           number: "Segment 7",
-          startImg: `img-${batchCodeLower}-121`,
-          endImg: `img-${batchCodeLower}-140`,
-          count: "20 images",
-          qcSpecialist: "Priya Sharma",
-          qcEmpId: "EMP-006",
-          allocatedAt: "6 Sep 2026 11:45am",
-          dueDate: "6 Sep 2026 04:30pm",
-          status: "In QC Review",
-        },
-        {
-          id: `seg-${batchCodeLower}-08`,
-          number: "Segment 8",
-          startImg: `img-${batchCodeLower}-141`,
-          endImg: `img-${batchCodeLower}-160`,
-          count: "20 images",
+          startSourceUnit: `SU-${batchCodeLower}-121`,
+          endSourceUnit: `SU-${batchCodeLower}-140`,
+          totalSourceUnits: "20 Source Units",
+          totalRecords: 410,
+          operator: "Priya Sharma",
+          operatorId: "EMP-003",
+          productionOutput: `SEG-${selectedBatch.batchCode}-07_output.csv`,
           qcSpecialist: "Vikram Seth",
           qcEmpId: "EMP-007",
-          allocatedAt: "6 Sep 2026 12:00pm",
-          dueDate: "6 Sep 2026 05:00pm",
-          status: "Pending Start",
+          qcStatus: "Allocated",
+          allocatedAt: "6 Sep 2026 11:45am",
+          lastUpdated: "6 Sep 2026 12:10pm",
         },
       ];
 
       const mockQCHistory = [
         {
           id: `log-qc-01`,
-          segmentId: `seg-${batchCodeLower}-01`,
-          qcSpecialist: "Anitha Roy",
-          qcEmpId: "EMP-005",
+          activity: "SEGMENT_ALLOCATED",
+          segmentId: `seg-${batchCodeLower}-06`,
+          details: `Segment 6 allocated to QC Specialist Anitha Roy (EMP-005).`,
           allocatedBy: "Lead QC Supervisor",
-          eventType: "INITIAL_ALLOCATION",
-          allocatedAt: "6 Sep 2026 11:00am",
-          status: "Assigned",
+          dateTime: "6 Sep 2026 11:30am",
         },
         {
           id: `log-qc-02`,
-          segmentId: `seg-${batchCodeLower}-02`,
-          qcSpecialist: "Priya Sharma",
-          qcEmpId: "EMP-006",
-          allocatedBy: "System Auto-Assign",
-          eventType: "REALLOCATION",
-          allocatedAt: "6 Sep 2026 10:15am",
-          status: "Reallocated",
+          activity: "MULTIPLE_SEGMENTS_ALLOCATED",
+          segmentId: `seg-${batchCodeLower}-06`,
+          details: `Multiple segments allocated to QC Specialist Anitha Roy (EMP-005).`,
+          allocatedBy: "Lead QC Supervisor",
+          dateTime: "6 Sep 2026 11:45am",
         },
         {
           id: `log-qc-03`,
-          segmentId: `seg-${batchCodeLower}-03`,
-          qcSpecialist: "Vikram Seth",
-          qcEmpId: "EMP-007",
+          activity: "SEGMENT_REALLOCATED",
+          segmentId: `seg-${batchCodeLower}-07`,
+          details: `Segment 7 reallocated from Anitha Roy (EMP-005) to Vikram Seth (EMP-007).`,
           allocatedBy: "Lead QC Supervisor",
-          eventType: "INITIAL_ALLOCATION",
-          allocatedAt: "6 Sep 2026 09:45am",
-          status: "Completed",
-        },
-        {
-          id: `log-qc-04`,
-          segmentId: `seg-${batchCodeLower}-04`,
-          qcSpecialist: "Anitha Roy",
-          qcEmpId: "EMP-005",
-          allocatedBy: "System Auto-Assign",
-          eventType: "INITIAL_ALLOCATION",
-          allocatedAt: "6 Sep 2026 09:30am",
-          status: "Completed",
+          dateTime: "6 Sep 2026 12:10pm",
         },
       ];
 
@@ -2210,8 +2660,8 @@ export function ProjectWorkspaceView() {
               className="border-primary/40 text-primary hover:bg-primary/5 cursor-pointer self-start border-dashed text-xs sm:self-auto"
             >
               {qcDemoHasData
-                ? "View Empty State (Screenshot View)"
-                : "Simulate Completed Segments"}
+                ? "View Empty State"
+                : "Simulate Eligible Segments"}
             </Button>
           </div>
 
@@ -2228,7 +2678,7 @@ export function ProjectWorkspaceView() {
               )}
             >
               <ShieldCheck className="h-4 w-4" />
-              <span>QC Eligible Segments</span>
+              <span>Unassigned QC Segments</span>
               <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[11px]">
                 {eligibleList.length}
               </span>
@@ -2253,7 +2703,7 @@ export function ProjectWorkspaceView() {
 
             <button
               type="button"
-              onClick={() => setQcAllocTab("history")}
+              onClick={() => setProdAllocTab("history")}
               className={cn(
                 "flex cursor-pointer items-center gap-2 border-b-2 pb-2 whitespace-nowrap transition-all",
                 qcAllocTab === "history"
@@ -2263,207 +2713,117 @@ export function ProjectWorkspaceView() {
             >
               <History className="h-4 w-4" />
               <span>QC Allocation History</span>
-              <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[11px]">
-                {historyList.length}
-              </span>
             </button>
           </div>
 
-          {/* Sub-Header: Allocation Mode Row */}
-          <div className="border-border/40 flex flex-col justify-between gap-3 border-b pb-3 text-xs sm:flex-row sm:items-center">
-            <div className="flex items-center gap-3">
-              <span className="text-muted-foreground font-semibold">
-                Allocation Mode:
-              </span>
-              <div className="bg-secondary/50 border-border/60 flex items-center rounded-xl border p-1">
-                <button
-                  type="button"
-                  onClick={() => setQcAllocMode("single")}
-                  className={cn(
-                    "cursor-pointer rounded-lg px-3 py-1 text-xs font-semibold transition-all",
-                    qcAllocMode === "single"
-                      ? "bg-primary text-primary-foreground font-bold shadow-xs"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  Single Segment
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setQcAllocMode("multiple")}
-                  className={cn(
-                    "cursor-pointer rounded-lg px-3 py-1 text-xs font-semibold transition-all",
-                    qcAllocMode === "multiple"
-                      ? "bg-primary text-primary-foreground font-bold shadow-xs"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  Multiple Segments
-                </button>
-              </div>
-            </div>
-
-            <div className="text-muted-foreground text-xs">
-              {qcAllocMode === "single"
-                ? "Allocate individual segments row-by-row"
-                : "Allocate multiple segments in batches"}
-            </div>
-          </div>
-
-          {/* TAB 1: QC ELIGIBLE SEGMENTS */}
+          {/* TAB 1: UNASSIGNED QC SEGMENTS */}
           {qcAllocTab === "eligible" && (
             <div className="space-y-4">
               {eligibleList.length === 0 ? (
-                /* Empty state matching the exact UI in user screenshot */
                 <Card className="bg-card/40 border-border/80 flex min-h-[300px] flex-col items-center justify-center space-y-2 rounded-xl border p-12 text-center shadow-xs">
                   <p className="text-foreground text-sm font-semibold">
                     No production-completed segments currently awaiting QC
                     allocation.
                   </p>
                   <p className="text-muted-foreground max-w-md text-xs">
-                    Segments appear here immediately as operators complete
-                    Production.
+                    Segments become eligible here after Production work is
+                    completed and output is submitted.
                   </p>
                 </Card>
               ) : (
-                <Card className="bg-card border-border space-y-4 overflow-hidden rounded-xl p-4 shadow-xs">
-                  {/* Bulk Action Bar for Multiple Mode */}
-                  {qcAllocMode === "multiple" && (
-                    <div className="bg-primary/5 border-primary/20 flex items-center justify-between rounded-lg border p-3 text-xs">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={
-                            selectedQCSegmentIds.length > 0 &&
-                            selectedQCSegmentIds.length === eligibleList.length
-                          }
-                          onChange={toggleSelectAllQCSegments}
-                          className="border-border text-primary focus:ring-primary h-4 w-4 cursor-pointer rounded"
-                        />
-                        <span className="text-foreground font-semibold">
-                          {selectedQCSegmentIds.length} of {eligibleList.length}{" "}
-                          segment(s) selected
-                        </span>
-                      </div>
-                      <Button
-                        disabled={selectedQCSegmentIds.length === 0}
-                        onClick={() => {
-                          setSelectedSegmentForQCAlloc(eligibleList[0]);
-                          setIsAllocateQCOpen(true);
-                        }}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground h-8 cursor-pointer gap-1.5 rounded-lg px-3 text-xs font-semibold"
-                      >
-                        <UserPlus className="h-3.5 w-3.5" /> Allocate Selected
-                        Segments
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Table View */}
+                <Card className="bg-card border-border overflow-hidden rounded-xl shadow-xs">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-secondary/50 text-muted-foreground border-border border-b text-[11px] font-bold uppercase">
-                        <tr>
-                          {qcAllocMode === "multiple" && (
-                            <th className="w-10 p-3.5">
-                              <input
-                                type="checkbox"
-                                checked={
-                                  selectedQCSegmentIds.length > 0 &&
-                                  selectedQCSegmentIds.length ===
-                                    eligibleList.length
-                                }
-                                onChange={toggleSelectAllQCSegments}
-                                className="border-border text-primary focus:ring-primary h-4 w-4 cursor-pointer rounded"
-                              />
-                            </th>
-                          )}
-                          <th className="p-3.5">Segment No & ID</th>
-                          <th className="p-3.5">Image Range</th>
-                          <th className="p-3.5">Count</th>
-                          <th className="p-3.5">Production Operator</th>
-                          <th className="p-3.5">Completed At</th>
-                          <th className="p-3.5">Prod Score</th>
-                          <th className="p-3.5 text-right">Action</th>
+                      <thead>
+                        <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[10px] font-bold tracking-wider whitespace-nowrap uppercase">
+                          <th className="p-3.5">SEGMENT ID</th>
+                          <th className="p-3.5">SEGMENT NUMBER</th>
+                          <th className="p-3.5">START SOURCE UNIT</th>
+                          <th className="p-3.5">END SOURCE UNIT</th>
+                          <th className="p-3.5">TOTAL SOURCE UNITS</th>
+                          <th className="p-3.5">TOTAL RECORDS</th>
+                          <th className="p-3.5">PRODUCTION EMPLOYEE</th>
+                          <th className="p-3.5">PRODUCTION OUTPUT FILE</th>
+                          <th className="p-3.5">QC STATUS</th>
+                          <th className="p-3.5 text-right">ACTIONS</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-border divide-y">
-                        {eligibleList.map((seg) => {
-                          const isSelected = selectedQCSegmentIds.includes(
-                            seg.id,
-                          );
-                          return (
-                            <tr
-                              key={seg.id}
-                              className="hover:bg-secondary/30 transition-colors"
-                            >
-                              {qcAllocMode === "multiple" && (
-                                <td className="p-3.5">
-                                  <input
-                                    type="checkbox"
-                                    checked={isSelected}
-                                    onChange={() =>
-                                      toggleSelectQCSegment(seg.id)
-                                    }
-                                    className="border-border text-primary focus:ring-primary h-4 w-4 cursor-pointer rounded"
-                                  />
-                                </td>
-                              )}
-                              <td className="p-3.5 font-medium">
-                                <div className="flex flex-col">
-                                  <span className="text-foreground text-sm font-bold">
-                                    {seg.number}
+                      <tbody className="divide-border/60 divide-y font-mono">
+                        {eligibleList.map((seg) => (
+                          <tr
+                            key={seg.id}
+                            className="hover:bg-secondary/20 transition-colors"
+                          >
+                            <td className="text-foreground p-3.5 font-mono font-bold">
+                              {seg.id}
+                            </td>
+                            <td className="text-foreground p-3.5 font-sans font-medium">
+                              {seg.number}
+                            </td>
+                            <td className="text-muted-foreground p-3.5 font-mono">
+                              {seg.startSourceUnit}
+                            </td>
+                            <td className="text-muted-foreground p-3.5 font-mono">
+                              {seg.endSourceUnit}
+                            </td>
+                            <td className="text-foreground p-3.5 font-sans font-bold">
+                              {seg.totalSourceUnits}
+                            </td>
+                            <td className="text-foreground p-3.5 font-mono font-bold">
+                              {seg.totalRecords}
+                            </td>
+                            <td className="p-3.5 font-sans">
+                              <div className="flex items-center gap-2">
+                                <div className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold">
+                                  {seg.operator[0]}
+                                </div>
+                                <div>
+                                  <span className="text-foreground block font-bold">
+                                    {seg.operator}
                                   </span>
-                                  <span className="text-primary font-mono text-[11px]">
-                                    {seg.id}
+                                  <span className="text-muted-foreground font-mono text-[10px]">
+                                    {seg.operatorId}
                                   </span>
                                 </div>
-                              </td>
-                              <td className="text-muted-foreground p-3.5 font-mono">
-                                {seg.startImg} &rarr; {seg.endImg}
-                              </td>
-                              <td className="text-foreground p-3.5 font-semibold">
-                                {seg.count}
-                              </td>
-                              <td className="p-3.5">
-                                <div className="flex items-center gap-2">
-                                  <div className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold">
-                                    {seg.operator[0]}
-                                  </div>
-                                  <div>
-                                    <span className="text-foreground block font-semibold">
-                                      {seg.operator}
-                                    </span>
-                                    <span className="text-muted-foreground font-mono text-[10px]">
-                                      {seg.operatorId}
-                                    </span>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="text-muted-foreground p-3.5 whitespace-nowrap">
-                                {seg.completedAt}
-                              </td>
-                              <td className="p-3.5">
-                                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-mono text-[11px] font-bold text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                                  {seg.accuracy}
-                                </span>
-                              </td>
-                              <td className="p-3.5 text-right">
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedSegmentForQCAlloc(seg);
-                                    setIsAllocateQCOpen(true);
-                                  }}
-                                  className="bg-primary hover:bg-primary/90 text-primary-foreground h-8 cursor-pointer gap-1.5 rounded-lg px-3 text-xs font-semibold shadow-xs"
-                                >
-                                  <UserPlus className="h-3.5 w-3.5" /> Allocate
-                                  QC
-                                </Button>
-                              </td>
-                            </tr>
-                          );
-                        })}
+                              </div>
+                            </td>
+                            <td className="p-3.5 font-sans whitespace-nowrap">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedProdOutputForView({
+                                    productionOutput: seg.productionOutput,
+                                    outputFileName: seg.productionOutput,
+                                  });
+                                  setIsViewProdOutputOpen(true);
+                                }}
+                                className="border-border h-7 cursor-pointer gap-1.5 rounded-lg px-2.5 text-xs font-semibold"
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                                View
+                              </Button>
+                            </td>
+                            <td className="p-3.5 font-sans">
+                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-600 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-400">
+                                <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                Pending
+                              </span>
+                            </td>
+                            <td className="p-3.5 text-right font-sans">
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedSegmentForQCAlloc(seg);
+                                  setIsAllocateQCOpen(true);
+                                }}
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground h-7 cursor-pointer gap-1.5 rounded-lg text-xs font-semibold"
+                              >
+                                <UserPlus className="h-3.5 w-3.5" /> Allocate
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
@@ -2480,47 +2840,83 @@ export function ProjectWorkspaceView() {
                   <p className="text-foreground font-semibold">
                     No active QC allocations found.
                   </p>
-                  <p>
-                    Allocated QC segments will appear here with live
-                    verification status.
-                  </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-secondary/50 text-muted-foreground border-border border-b text-[11px] font-bold uppercase">
-                      <tr>
-                        <th className="p-3.5">Segment</th>
-                        <th className="p-3.5">QC Specialist</th>
-                        <th className="p-3.5">Allocated At</th>
-                        <th className="p-3.5">Target Completion</th>
-                        <th className="p-3.5">QC Status</th>
-                        <th className="p-3.5 text-right">Actions</th>
+                    <thead>
+                      <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[10px] font-bold tracking-wider whitespace-nowrap uppercase">
+                        <th className="p-3.5">SEGMENT ID</th>
+                        <th className="p-3.5">SEGMENT NUMBER</th>
+                        <th className="p-3.5">START SOURCE UNIT</th>
+                        <th className="p-3.5">END SOURCE UNIT</th>
+                        <th className="p-3.5">TOTAL SOURCE UNITS</th>
+                        <th className="p-3.5">TOTAL RECORDS</th>
+                        <th className="p-3.5">PRODUCTION EMPLOYEE</th>
+                        <th className="p-3.5">PRODUCTION OUTPUT FILE</th>
+                        <th className="p-3.5">QC EMPLOYEE</th>
+                        <th className="p-3.5">QC STATUS</th>
+                        <th className="p-3.5">ALLOCATED AT</th>
+                        <th className="p-3.5">LAST UPDATED</th>
+                        <th className="p-3.5 text-right">ACTIONS</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-border divide-y">
+                    <tbody className="divide-border/60 divide-y font-mono">
                       {allocationsList.map((item) => (
                         <tr
                           key={item.id}
-                          className="hover:bg-secondary/30 transition-colors"
+                          className="hover:bg-secondary/20 transition-colors"
                         >
-                          <td className="p-3.5 font-medium">
-                            <div className="flex flex-col">
-                              <span className="text-foreground font-bold">
-                                {item.number}
-                              </span>
-                              <span className="text-primary font-mono text-[11px]">
-                                {item.id}
-                              </span>
-                            </div>
+                          <td className="text-foreground p-3.5 font-mono font-bold">
+                            {item.id}
                           </td>
-                          <td className="p-3.5">
+                          <td className="text-foreground p-3.5 font-sans font-medium">
+                            {item.number}
+                          </td>
+                          <td className="text-muted-foreground p-3.5 font-mono">
+                            {item.startSourceUnit}
+                          </td>
+                          <td className="text-muted-foreground p-3.5 font-mono">
+                            {item.endSourceUnit}
+                          </td>
+                          <td className="text-foreground p-3.5 font-sans font-bold">
+                            {item.totalSourceUnits}
+                          </td>
+                          <td className="text-foreground p-3.5 font-mono font-bold">
+                            {item.totalRecords}
+                          </td>
+                          <td className="p-3.5 font-sans">
+                            <span className="text-foreground block font-bold">
+                              {item.operator}
+                            </span>
+                            <span className="text-muted-foreground font-mono text-[10px]">
+                              {item.operatorId}
+                            </span>
+                          </td>
+                          <td className="p-3.5 font-sans whitespace-nowrap">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedProdOutputForView({
+                                  productionOutput: item.productionOutput,
+                                  outputFileName: item.productionOutput,
+                                });
+                                setIsViewProdOutputOpen(true);
+                              }}
+                              className="border-border h-7 cursor-pointer gap-1.5 rounded-lg px-2.5 text-xs font-semibold"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              View
+                            </Button>
+                          </td>
+                          <td className="p-3.5 font-sans">
                             <div className="flex items-center gap-2">
-                              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/10 text-[10px] font-bold text-blue-600">
+                              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/10 text-xs font-bold text-blue-600">
                                 {item.qcSpecialist[0]}
                               </div>
                               <div>
-                                <span className="text-foreground block font-semibold">
+                                <span className="text-foreground block font-bold">
                                   {item.qcSpecialist}
                                 </span>
                                 <span className="text-muted-foreground font-mono text-[10px]">
@@ -2529,29 +2925,40 @@ export function ProjectWorkspaceView() {
                               </div>
                             </div>
                           </td>
+                          <td className="p-3.5 font-sans">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+                              <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                              Allocated
+                            </span>
+                          </td>
                           <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
                             {item.allocatedAt}
                           </td>
                           <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
-                            {item.dueDate}
+                            {item.lastUpdated}
                           </td>
-                          <td className="p-3.5">
-                            <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
-                              <Clock className="h-3 w-3" /> {item.status}
-                            </span>
-                          </td>
-                          <td className="p-3.5 text-right">
+                          <td className="space-x-2 p-3.5 text-right font-sans whitespace-nowrap">
                             <Button
                               variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedQCAllocForView(item);
+                                setIsViewQCAllocOpen(true);
+                              }}
+                              className="border-border h-7 cursor-pointer gap-1.5 rounded-lg text-xs font-semibold"
+                            >
+                              <Eye className="h-3.5 w-3.5" /> View
+                            </Button>
+                            <Button
+                              variant="ghost"
                               size="sm"
                               onClick={() => {
                                 setSelectedSegmentForQCRealloc(item);
                                 setIsReallocateQCOpen(true);
                               }}
-                              className="border-border hover:bg-secondary h-8 cursor-pointer gap-1.5 rounded-lg px-3 text-xs font-semibold"
+                              className="text-primary hover:bg-primary/10 h-7 cursor-pointer gap-1 text-xs font-semibold"
                             >
                               <RefreshCw className="h-3.5 w-3.5" /> Reallocate
-                              QC
                             </Button>
                           </td>
                         </tr>
@@ -2566,112 +2973,252 @@ export function ProjectWorkspaceView() {
           {/* TAB 3: QC ALLOCATION HISTORY */}
           {qcAllocTab === "history" && (
             <Card className="bg-card border-border overflow-hidden rounded-xl shadow-xs">
-              {historyList.length === 0 ? (
-                <div className="text-muted-foreground space-y-1 p-12 text-center text-xs">
-                  <p className="text-foreground font-semibold">
-                    No QC allocation history recorded.
-                  </p>
-                  <p>
-                    Log entries will automatically record when QC specialists
-                    are assigned or reallocated.
-                  </p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-secondary/50 text-muted-foreground border-border border-b text-[11px] font-bold uppercase">
-                      <tr>
-                        <th className="p-3.5">Segment ID</th>
-                        <th className="p-3.5">Event Type</th>
-                        <th className="p-3.5">QC Specialist</th>
-                        <th className="p-3.5">Allocated By</th>
-                        <th className="p-3.5">Timestamp</th>
-                        <th className="p-3.5">Status</th>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-border bg-secondary/40 text-muted-foreground border-b text-[10px] font-bold tracking-wider whitespace-nowrap uppercase">
+                      <th className="p-3.5">ACTIVITY</th>
+                      <th className="p-3.5">SEGMENT ID</th>
+                      <th className="p-3.5">DETAILS</th>
+                      <th className="p-3.5">ALLOCATED BY</th>
+                      <th className="p-3.5 whitespace-nowrap">DATE & TIME</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-border/60 divide-y">
+                    {historyList.map((log) => (
+                      <tr
+                        key={log.id}
+                        className="hover:bg-secondary/20 transition-colors"
+                      >
+                        <td className="p-3.5 font-mono font-bold">
+                          <span
+                            className={cn(
+                              "inline-block rounded-md border px-2 py-0.5 text-[10px]",
+                              log.activity === "SEGMENT_REALLOCATED"
+                                ? "border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                                : "border-primary/20 bg-primary/10 text-primary",
+                            )}
+                          >
+                            {log.activity}
+                          </span>
+                        </td>
+                        <td className="text-foreground p-3.5 font-mono font-bold">
+                          {log.segmentId}
+                        </td>
+                        <td className="text-foreground max-w-md p-3.5 font-medium">
+                          {log.details}
+                        </td>
+                        <td className="text-foreground p-3.5 font-semibold">
+                          {log.allocatedBy}
+                        </td>
+                        <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
+                          {log.dateTime}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-border divide-y">
-                      {historyList.map((log) => (
-                        <tr
-                          key={log.id}
-                          className="hover:bg-secondary/30 transition-colors"
-                        >
-                          <td className="text-primary p-3.5 font-mono font-semibold">
-                            {log.segmentId}
-                          </td>
-                          <td className="p-3.5">
-                            <span className="bg-secondary border-border rounded-md border px-2 py-0.5 font-mono text-[11px] font-bold">
-                              {log.eventType}
-                            </span>
-                          </td>
-                          <td className="text-foreground p-3.5 font-semibold">
-                            {log.qcSpecialist} ({log.qcEmpId})
-                          </td>
-                          <td className="text-muted-foreground p-3.5">
-                            {log.allocatedBy}
-                          </td>
-                          <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
-                            {log.allocatedAt}
-                          </td>
-                          <td className="p-3.5">
-                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                              <CheckCircle2 className="h-3 w-3" /> {log.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </Card>
           )}
 
-          {/* ALLOCATE QC SPECIALIST DIALOG */}
-          <Dialog open={isAllocateQCOpen} onOpenChange={setIsAllocateQCOpen}>
-            <DialogContent className="bg-card border-border sm:max-w-md">
-              <DialogHeader>
+          {/* VIEW QC ALLOCATION DETAILS MODAL */}
+          <Dialog open={isViewQCAllocOpen} onOpenChange={setIsViewQCAllocOpen}>
+            <DialogContent className="bg-card border-border text-foreground max-w-2xl rounded-2xl p-6 sm:max-w-3xl">
+              <DialogHeader className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="text-primary bg-primary/10 border-primary/20 rounded-md border px-2.5 py-0.5 font-mono text-xs font-bold">
-                    {selectedSegmentForQCAlloc?.id || "seg-batch-010-01"}
+                    {selectedQCAllocForView?.id || `seg-${batchCodeLower}-06`}
                   </span>
                   <DialogTitle className="text-foreground text-lg font-bold">
-                    Allocate QC Specialist
+                    QC Allocation Details
                   </DialogTitle>
                 </div>
                 <DialogDescription className="text-muted-foreground text-xs">
-                  Assign production-completed segment to a certified QC
-                  specialist for quality verification.
+                  Detailed breakdown of the allocated QC segment.
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="space-y-4 py-2 text-xs">
-                <Card className="bg-secondary/30 border-border space-y-2 rounded-xl border p-3.5">
-                  <span className="text-muted-foreground text-[11px] font-bold tracking-wider uppercase">
-                    Target Segment
-                  </span>
-                  <div className="grid grid-cols-3 gap-2">
+              <div className="space-y-5 py-2 text-xs">
+                <Card className="bg-secondary/30 border-border rounded-xl border p-4">
+                  <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-3">
                     <div>
-                      <span className="text-muted-foreground block text-[10px]">
-                        Segment
+                      <span className="text-muted-foreground block text-[11px]">
+                        Segment ID
                       </span>
-                      <span className="text-foreground font-bold">
+                      <span className="text-primary mt-0.5 block font-mono text-xs font-bold">
+                        {selectedQCAllocForView?.id ||
+                          `seg-${batchCodeLower}-06`}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Segment Number
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
+                        {selectedQCAllocForView?.number || "Segment 6"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Start Source Unit
+                      </span>
+                      <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
+                        {selectedQCAllocForView?.startSourceUnit ||
+                          `SU-${batchCodeLower}-101`}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        End Source Unit
+                      </span>
+                      <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
+                        {selectedQCAllocForView?.endSourceUnit ||
+                          `SU-${batchCodeLower}-120`}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Total Source Units
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
+                        {selectedQCAllocForView?.totalSourceUnits ||
+                          "20 Source Units"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Production Employee
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
+                        {selectedQCAllocForView?.operator || "Mathan Kumar"} (
+                        {selectedQCAllocForView?.operatorId || "EMP-001"})
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        QC Employee
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
+                        {selectedQCAllocForView?.qcSpecialist || "Anitha Roy"} (
+                        {selectedQCAllocForView?.qcEmpId || "EMP-005"})
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        QC Status
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
+                        {selectedQCAllocForView?.qcStatus || "IN QC REVIEW"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Allocated At
+                      </span>
+                      <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
+                        {selectedQCAllocForView?.allocatedAt ||
+                          "6 Sep 2026 11:30am"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Last Updated
+                      </span>
+                      <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
+                        {selectedQCAllocForView?.lastUpdated ||
+                          "6 Sep 2026 12:10pm"}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsViewQCAllocOpen(false)}
+                  className="border-border h-9 cursor-pointer rounded-lg px-4 text-xs font-semibold"
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* ALLOCATE QC SPECIALIST DIALOG */}
+          <Dialog open={isAllocateQCOpen} onOpenChange={setIsAllocateQCOpen}>
+            <DialogContent className="bg-card border-border text-foreground max-w-2xl rounded-2xl p-6 sm:max-w-3xl">
+              <DialogHeader className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-primary bg-primary/10 border-primary/20 rounded-md border px-2.5 py-0.5 font-mono text-xs font-bold">
+                    {selectedSegmentForQCAlloc?.id ||
+                      `seg-${batchCodeLower}-01`}
+                  </span>
+                  <DialogTitle className="text-foreground text-lg font-bold">
+                    Allocate QC Employee
+                  </DialogTitle>
+                </div>
+                <DialogDescription className="text-muted-foreground text-xs">
+                  Assign production-completed segment to an eligible certified
+                  QC employee.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-5 py-2 text-xs">
+                <Card className="bg-secondary/30 border-border rounded-xl border p-4">
+                  <div className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-5">
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Segment ID
+                      </span>
+                      <span className="text-primary mt-0.5 block font-mono text-xs font-bold">
+                        {selectedSegmentForQCAlloc?.id ||
+                          `seg-${batchCodeLower}-01`}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Segment No
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
                         {selectedSegmentForQCAlloc?.number || "Segment 1"}
                       </span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground block text-[10px]">
-                        Images
+                      <span className="text-muted-foreground block text-[11px]">
+                        Start Source Unit
                       </span>
-                      <span className="text-foreground font-mono">
-                        {selectedSegmentForQCAlloc?.count || "20 images"}
+                      <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
+                        {selectedSegmentForQCAlloc?.startSourceUnit ||
+                          `SU-${batchCodeLower}-001`}
                       </span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground block text-[10px]">
-                        Prod Operator
+                      <span className="text-muted-foreground block text-[11px]">
+                        End Source Unit
                       </span>
-                      <span className="text-foreground font-semibold">
-                        {selectedSegmentForQCAlloc?.operator || "Mathan Kumar"}
+                      <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
+                        {selectedSegmentForQCAlloc?.endSourceUnit ||
+                          `SU-${batchCodeLower}-020`}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Total Source Units
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
+                        {selectedSegmentForQCAlloc?.totalSourceUnits ||
+                          "20 Source Units"}
                       </span>
                     </div>
                   </div>
@@ -2679,7 +3226,7 @@ export function ProjectWorkspaceView() {
 
                 <div className="space-y-1.5">
                   <Label className="text-foreground text-xs font-semibold">
-                    Select Certified QC Specialist{" "}
+                    Select QC-Eligible Employee{" "}
                     <span className="text-red-500">*</span>
                   </Label>
                   <Select
@@ -2687,38 +3234,32 @@ export function ProjectWorkspaceView() {
                     onValueChange={setSelectedQCEmployee}
                   >
                     <SelectTrigger className="bg-background border-border h-9 rounded-lg text-xs">
-                      <SelectValue placeholder="Select QC Specialist" />
+                      <SelectValue placeholder="Select QC Employee" />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border text-xs">
                       <SelectItem value="EMP-005">
-                        Anitha Roy (EMP-005) &mdash; QC Lead Certified
+                        Anitha Roy (EMP-005) &mdash; QC Certified Lead
                       </SelectItem>
                       <SelectItem value="EMP-006">
-                        Priya Sharma (EMP-006) &mdash; Senior QC Auditor
+                        Priya Sharma (EMP-006) &mdash; QC Senior Auditor
                       </SelectItem>
                       <SelectItem value="EMP-007">
-                        Vikram Seth (EMP-007) &mdash; QC Specialist
+                        Vikram Seth (EMP-007) &mdash; QC Certified Specialist
                       </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <Card className="bg-primary/5 border-primary/20 flex items-center justify-between rounded-xl border p-3.5">
-                  <div>
-                    <span className="text-primary font-mono text-xs font-bold">
-                      EMP-005
-                    </span>
-                    <span className="text-foreground block text-xs font-bold">
-                      Anitha Roy
-                    </span>
-                    <span className="text-muted-foreground text-[11px]">
-                      Lead Quality Assurance
-                    </span>
-                  </div>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                    <ShieldCheck className="h-3 w-3" /> QC Certified
-                  </span>
-                </Card>
+                <div className="bg-primary/5 border-primary/20 rounded-xl border p-3.5 text-xs">
+                  <p className="text-foreground font-semibold">
+                    QC Allocation Rules:
+                  </p>
+                  <p className="text-muted-foreground mt-0.5 text-[11px]">
+                    One QC employee can be allocated multiple segments. At any
+                    given time, one segment has only one active QC employee.
+                    Only certified QC-eligible employees are selectable.
+                  </p>
+                </div>
               </div>
 
               <DialogFooter className="gap-2 pt-2 sm:gap-0">
@@ -2747,27 +3288,87 @@ export function ProjectWorkspaceView() {
             open={isReallocateQCOpen}
             onOpenChange={setIsReallocateQCOpen}
           >
-            <DialogContent className="bg-card border-border sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-foreground text-lg font-bold">
-                  Reallocate QC Specialist
-                </DialogTitle>
+            <DialogContent className="bg-card border-border text-foreground max-w-2xl rounded-2xl p-6 sm:max-w-3xl">
+              <DialogHeader className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-primary bg-primary/10 border-primary/20 rounded-md border px-2.5 py-0.5 font-mono text-xs font-bold">
+                    {selectedSegmentForQCRealloc?.id ||
+                      `seg-${batchCodeLower}-06`}
+                  </span>
+                  <DialogTitle className="text-foreground text-lg font-bold">
+                    Reallocate QC Segment
+                  </DialogTitle>
+                </div>
                 <DialogDescription className="text-muted-foreground text-xs">
-                  Reassign segment to a different certified QC specialist.
+                  Reallocate this segment to another eligible QC employee.
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="space-y-4 py-2 text-xs">
+              <div className="space-y-5 py-2 text-xs">
+                <Card className="bg-secondary/30 border-border rounded-xl border p-4">
+                  <div className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-5">
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Segment ID
+                      </span>
+                      <span className="text-primary mt-0.5 block font-mono text-xs font-bold">
+                        {selectedSegmentForQCRealloc?.id ||
+                          `seg-${batchCodeLower}-06`}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Segment No
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
+                        {selectedSegmentForQCRealloc?.number || "Segment 6"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Start Source Unit
+                      </span>
+                      <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
+                        {selectedSegmentForQCRealloc?.startSourceUnit ||
+                          `SU-${batchCodeLower}-101`}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        End Source Unit
+                      </span>
+                      <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
+                        {selectedSegmentForQCRealloc?.endSourceUnit ||
+                          `SU-${batchCodeLower}-120`}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Total Source Units
+                      </span>
+                      <span className="text-foreground mt-0.5 block text-xs font-bold">
+                        {selectedSegmentForQCRealloc?.totalSourceUnits ||
+                          "20 Source Units"}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+
                 <div className="space-y-1.5">
                   <Label className="text-foreground text-xs font-semibold">
-                    Select Replacement QC Specialist
+                    Select Replacement QC Employee{" "}
+                    <span className="text-red-500">*</span>
                   </Label>
                   <Select
                     value={selectedQCEmployee}
                     onValueChange={setSelectedQCEmployee}
                   >
                     <SelectTrigger className="bg-background border-border h-9 rounded-lg text-xs">
-                      <SelectValue placeholder="Select Replacement QC" />
+                      <SelectValue placeholder="Select Replacement QC Employee" />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border text-xs">
                       <SelectItem value="EMP-006">
@@ -2775,6 +3376,9 @@ export function ProjectWorkspaceView() {
                       </SelectItem>
                       <SelectItem value="EMP-007">
                         Vikram Seth (EMP-007) &mdash; QC Specialist
+                      </SelectItem>
+                      <SelectItem value="EMP-005">
+                        Anitha Roy (EMP-005) &mdash; QC Lead Certified
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -2809,9 +3413,13 @@ export function ProjectWorkspaceView() {
         {
           id: `seg-${batchCodeLower}-01`,
           number: "Segment 1",
-          startImg: `img-${batchCodeLower}-001`,
-          endImg: `img-${batchCodeLower}-020`,
-          count: "20 images",
+          startSourceUnit: `SU-${batchCodeLower}-001`,
+          endSourceUnit: `SU-${batchCodeLower}-020`,
+          totalSourceUnits: "20 Source Units",
+          totalRecords: 350,
+          operator: "Mathan Kumar",
+          operatorId: "EMP-001",
+          productionOutput: `SEG-${selectedBatch.batchCode}-01_output.csv`,
           qcSpecialist: "Anitha Roy",
           qcEmpId: "EMP-005",
           accuracy: "100%",
@@ -2822,9 +3430,13 @@ export function ProjectWorkspaceView() {
         {
           id: `seg-${batchCodeLower}-02`,
           number: "Segment 2",
-          startImg: `img-${batchCodeLower}-021`,
-          endImg: `img-${batchCodeLower}-040`,
-          count: "20 images",
+          startSourceUnit: `SU-${batchCodeLower}-021`,
+          endSourceUnit: `SU-${batchCodeLower}-040`,
+          totalSourceUnits: "20 Source Units",
+          totalRecords: 420,
+          operator: "Anitha Roy",
+          operatorId: "EMP-002",
+          productionOutput: `SEG-${selectedBatch.batchCode}-02_output.csv`,
           qcSpecialist: "Priya Sharma",
           qcEmpId: "EMP-006",
           accuracy: "98.5%",
@@ -2835,9 +3447,13 @@ export function ProjectWorkspaceView() {
         {
           id: `seg-${batchCodeLower}-03`,
           number: "Segment 3",
-          startImg: `img-${batchCodeLower}-041`,
-          endImg: `img-${batchCodeLower}-060`,
-          count: "20 images",
+          startSourceUnit: `SU-${batchCodeLower}-041`,
+          endSourceUnit: `SU-${batchCodeLower}-060`,
+          totalSourceUnits: "20 Source Units",
+          totalRecords: 180,
+          operator: "Priya Sharma",
+          operatorId: "EMP-003",
+          productionOutput: `SEG-${selectedBatch.batchCode}-03_output.csv`,
           qcSpecialist: "Vikram Seth",
           qcEmpId: "EMP-007",
           accuracy: "99.0%",
@@ -2848,9 +3464,13 @@ export function ProjectWorkspaceView() {
         {
           id: `seg-${batchCodeLower}-04`,
           number: "Segment 4",
-          startImg: `img-${batchCodeLower}-061`,
-          endImg: `img-${batchCodeLower}-080`,
-          count: "20 images",
+          startSourceUnit: `SU-${batchCodeLower}-061`,
+          endSourceUnit: `SU-${batchCodeLower}-080`,
+          totalSourceUnits: "20 Source Units",
+          totalRecords: 85,
+          operator: "Mathan Kumar",
+          operatorId: "EMP-001",
+          productionOutput: `SEG-${selectedBatch.batchCode}-04_output.csv`,
           qcSpecialist: "Anitha Roy",
           qcEmpId: "EMP-005",
           accuracy: "100%",
@@ -2858,41 +3478,51 @@ export function ProjectWorkspaceView() {
           status: "Passed QC",
           verifiedAt: "6 Sep 2026 01:45pm",
         },
-        {
-          id: `seg-${batchCodeLower}-05`,
-          number: "Segment 5",
-          startImg: `img-${batchCodeLower}-081`,
-          endImg: `img-${batchCodeLower}-100`,
-          count: "20 images",
-          qcSpecialist: "Priya Sharma",
-          qcEmpId: "EMP-006",
-          accuracy: "99.5%",
-          defects: "0 defects",
-          status: "Passed QC",
-          verifiedAt: "6 Sep 2026 02:15pm",
-        },
       ];
 
       const mockQCOutputList = [
         {
-          id: `pkg-${batchCodeLower}-01`,
-          packageName: `QC-RELEASE-${selectedBatch.batchCode}-PKG01`,
-          segmentCount: "3 Segments",
-          imageCount: "60 Images",
-          passRate: "99.2%",
-          approvedBy: "Lead QC Supervisor",
-          releasedAt: "6 Sep 2026 01:30pm",
-          status: "READY_FOR_CONSOLIDATION",
+          id: `qcout-${batchCodeLower}-01`,
+          segmentId: `seg-${batchCodeLower}-01`,
+          segmentNumber: "Segment 1",
+          startSourceUnit: `SU-${batchCodeLower}-001`,
+          endSourceUnit: `SU-${batchCodeLower}-020`,
+          totalSourceUnits: "20 Source Units",
+          productionOutput: `SEG-${selectedBatch.batchCode}-01_output.csv`,
+          errorCount: 0,
+          errorDetails: "None (100% accuracy)",
+          qcStatus: "Completed",
+          qcResult: "Approved",
+          completedAt: "6 Sep 2026 11:45am",
         },
         {
-          id: `pkg-${batchCodeLower}-02`,
-          packageName: `QC-RELEASE-${selectedBatch.batchCode}-PKG02`,
-          segmentCount: "2 Segments",
-          imageCount: "40 Images",
-          passRate: "99.8%",
-          approvedBy: "Lead QC Supervisor",
-          releasedAt: "6 Sep 2026 02:30pm",
-          status: "READY_FOR_CONSOLIDATION",
+          id: `qcout-${batchCodeLower}-02`,
+          segmentId: `seg-${batchCodeLower}-02`,
+          segmentNumber: "Segment 2",
+          startSourceUnit: `SU-${batchCodeLower}-021`,
+          endSourceUnit: `SU-${batchCodeLower}-040`,
+          totalSourceUnits: "20 Source Units",
+          productionOutput: `SEG-${selectedBatch.batchCode}-02_v1_output.csv`,
+          errorCount: 3,
+          errorDetails: "3 critical typos in header dates",
+          qcStatus: "Completed",
+          qcResult: "Failed",
+          completedAt: "6 Sep 2026 12:10pm",
+          reworkTriggered: true,
+        },
+        {
+          id: `qcout-${batchCodeLower}-03`,
+          segmentId: `seg-${batchCodeLower}-03`,
+          segmentNumber: "Segment 3",
+          startSourceUnit: `SU-${batchCodeLower}-041`,
+          endSourceUnit: `SU-${batchCodeLower}-060`,
+          totalSourceUnits: "20 Source Units",
+          productionOutput: `SEG-${selectedBatch.batchCode}-03_output.csv`,
+          errorCount: 0,
+          errorDetails: "None (99.0% accuracy)",
+          qcStatus: "Completed",
+          qcResult: "Approved",
+          completedAt: "6 Sep 2026 01:20pm",
         },
       ];
 
@@ -3115,52 +3745,93 @@ export function ProjectWorkspaceView() {
                 <Card className="bg-card border-border overflow-hidden rounded-xl shadow-xs">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-secondary/50 text-muted-foreground border-border border-b text-[11px] font-bold uppercase">
+                      <thead className="bg-secondary/50 text-muted-foreground border-border border-b text-[10px] font-bold whitespace-nowrap uppercase">
                         <tr>
-                          <th className="p-3.5">Segment</th>
-                          <th className="p-3.5">QC Specialist</th>
-                          <th className="p-3.5">Image Range</th>
-                          <th className="p-3.5">Accuracy Rate</th>
-                          <th className="p-3.5">Defects</th>
-                          <th className="p-3.5">Verification Status</th>
-                          <th className="p-3.5">Timestamp</th>
-                          <th className="p-3.5 text-right">Action</th>
+                          <th className="p-3.5">SEGMENT ID</th>
+                          <th className="p-3.5">SEGMENT NUMBER</th>
+                          <th className="p-3.5">START SOURCE UNIT</th>
+                          <th className="p-3.5">END SOURCE UNIT</th>
+                          <th className="p-3.5">TOTAL SOURCE UNITS</th>
+                          <th className="p-3.5">TOTAL RECORDS</th>
+                          <th className="p-3.5">PRODUCTION EMPLOYEE</th>
+                          <th className="p-3.5">PRODUCTION OUTPUT FILE</th>
+                          <th className="p-3.5">QC EMPLOYEE</th>
+                          <th className="p-3.5">ACCURACY RATE</th>
+                          <th className="p-3.5">DEFECTS</th>
+                          <th className="p-3.5">QC STATUS</th>
+                          <th className="p-3.5">VERIFIED AT</th>
+                          <th className="p-3.5 text-right">ACTIONS</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-border divide-y">
+                      <tbody className="divide-border divide-y font-mono">
                         {trackingList.map((item) => (
                           <tr
                             key={item.id}
                             className="hover:bg-secondary/30 transition-colors"
                           >
-                            <td className="p-3.5 font-medium">
-                              <div className="flex flex-col">
-                                <span className="text-foreground font-bold">
-                                  {item.number}
-                                </span>
-                                <span className="text-primary font-mono text-[11px]">
-                                  {item.id}
-                                </span>
-                              </div>
+                            <td className="text-foreground p-3.5 font-mono font-bold">
+                              {item.id}
                             </td>
-                            <td className="text-foreground p-3.5 font-semibold">
-                              {item.qcSpecialist} ({item.qcEmpId})
+                            <td className="text-foreground p-3.5 font-sans font-medium">
+                              {item.number}
                             </td>
-                            <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
-                              {item.startImg} &rarr; {item.endImg}
+                            <td className="text-muted-foreground p-3.5 font-mono">
+                              {item.startSourceUnit}
+                            </td>
+                            <td className="text-muted-foreground p-3.5 font-mono">
+                              {item.endSourceUnit}
+                            </td>
+                            <td className="text-foreground p-3.5 font-sans font-bold">
+                              {item.totalSourceUnits}
+                            </td>
+                            <td className="text-foreground p-3.5 font-mono font-bold">
+                              {item.totalRecords}
+                            </td>
+                            <td className="p-3.5 font-sans">
+                              <span className="text-foreground block leading-tight font-bold">
+                                {item.operator}
+                              </span>
+                              <span className="text-muted-foreground font-mono text-[10px]">
+                                {item.operatorId}
+                              </span>
+                            </td>
+                            <td className="p-3.5 font-sans whitespace-nowrap">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedProdOutputForView({
+                                    productionOutput: item.productionOutput,
+                                    outputFileName: item.productionOutput,
+                                  });
+                                  setIsViewProdOutputOpen(true);
+                                }}
+                                className="border-border h-7 cursor-pointer gap-1.5 rounded-lg px-2.5 text-xs font-semibold"
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                                View
+                              </Button>
+                            </td>
+                            <td className="p-3.5 font-sans">
+                              <span className="text-foreground block leading-tight font-bold">
+                                {item.qcSpecialist}
+                              </span>
+                              <span className="text-muted-foreground font-mono text-[10px]">
+                                {item.qcEmpId}
+                              </span>
                             </td>
                             <td className="p-3.5">
                               <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
                                 {item.accuracy}
                               </span>
                             </td>
-                            <td className="text-muted-foreground p-3.5">
+                            <td className="text-muted-foreground p-3.5 font-sans">
                               {item.defects}
                             </td>
-                            <td className="p-3.5">
+                            <td className="p-3.5 font-sans">
                               <span
                                 className={cn(
-                                  "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold",
+                                  "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold",
                                   item.status === "Passed QC"
                                     ? "border-emerald-200 bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"
                                     : "border-amber-200 bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400",
@@ -3177,11 +3848,11 @@ export function ProjectWorkspaceView() {
                             <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
                               {item.verifiedAt}
                             </td>
-                            <td className="p-3.5 text-right">
+                            <td className="p-3.5 text-right font-sans">
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="border-border hover:bg-secondary h-8 cursor-pointer gap-1.5 rounded-lg px-3 text-xs font-semibold"
+                                className="border-border hover:bg-secondary h-7 cursor-pointer gap-1.5 rounded-lg px-2.5 text-xs font-semibold"
                               >
                                 <Eye className="h-3.5 w-3.5" /> Inspect Sheet
                               </Button>
@@ -3202,58 +3873,131 @@ export function ProjectWorkspaceView() {
               {outputList.length === 0 ? (
                 <div className="text-muted-foreground space-y-1 p-12 text-center text-xs">
                   <p className="text-foreground font-semibold">
-                    No verified QC release packages available.
+                    No completed QC output records available.
                   </p>
                   <p>
-                    QC release packages will compile here once segments complete
+                    Completed QC outputs will appear here once segments finish
                     verification.
                   </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-secondary/50 text-muted-foreground border-border border-b text-[11px] font-bold uppercase">
+                    <thead className="bg-secondary/50 text-muted-foreground border-border border-b text-[10px] font-bold whitespace-nowrap uppercase">
                       <tr>
-                        <th className="p-3.5">Package ID</th>
-                        <th className="p-3.5">Segments</th>
-                        <th className="p-3.5">Images</th>
-                        <th className="p-3.5">Pass Rate</th>
-                        <th className="p-3.5">Approved By</th>
-                        <th className="p-3.5">Release Timestamp</th>
-                        <th className="p-3.5 text-right">
-                          Consolidation Status
+                        <th className="p-3.5">SEGMENT ID</th>
+                        <th className="p-3.5">SEGMENT NUMBER</th>
+                        <th className="p-3.5">START SOURCE UNIT</th>
+                        <th className="p-3.5">END SOURCE UNIT</th>
+                        <th className="p-3.5">TOTAL SOURCE UNITS</th>
+                        <th className="p-3.5">PRODUCTION OUTPUT FILE</th>
+                        <th className="p-3.5">ERROR COUNT</th>
+                        <th className="p-3.5">ERROR DETAILS</th>
+                        <th className="p-3.5">QC STATUS</th>
+                        <th className="p-3.5">QC RESULT</th>
+                        <th className="p-3.5 whitespace-nowrap">
+                          COMPLETED AT
+                        </th>
+                        <th className="p-3.5 text-right whitespace-nowrap">
+                          ACTION
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-border divide-y">
+                    <tbody className="divide-border divide-y font-mono">
                       {outputList.map((pkg) => (
                         <tr
                           key={pkg.id}
                           className="hover:bg-secondary/30 transition-colors"
                         >
-                          <td className="text-primary p-3.5 font-mono font-bold">
-                            {pkg.packageName}
+                          <td className="text-foreground p-3.5 font-mono font-bold">
+                            {pkg.segmentId}
                           </td>
-                          <td className="text-foreground p-3.5 font-semibold">
-                            {pkg.segmentCount}
+                          <td className="text-foreground p-3.5 font-sans font-medium">
+                            {pkg.segmentNumber}
                           </td>
-                          <td className="text-foreground p-3.5 font-semibold">
-                            {pkg.imageCount}
+                          <td className="text-muted-foreground p-3.5 font-mono">
+                            {pkg.startSourceUnit}
                           </td>
-                          <td className="p-3.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                            {pkg.passRate}
+                          <td className="text-muted-foreground p-3.5 font-mono">
+                            {pkg.endSourceUnit}
                           </td>
-                          <td className="text-muted-foreground p-3.5">
-                            {pkg.approvedBy}
+                          <td className="text-foreground p-3.5 font-sans font-bold">
+                            {pkg.totalSourceUnits}
+                          </td>
+                          <td className="p-3.5 font-sans whitespace-nowrap">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedProdOutputForView({
+                                  productionOutput: pkg.productionOutput,
+                                  outputFileName: pkg.productionOutput,
+                                });
+                                setIsViewProdOutputOpen(true);
+                              }}
+                              className="border-border h-7 cursor-pointer gap-1.5 rounded-lg px-2.5 text-xs font-semibold"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              View
+                            </Button>
+                          </td>
+                          <td className="p-3.5 font-mono font-bold">
+                            <span
+                              className={cn(
+                                pkg.errorCount > 0
+                                  ? "text-rose-600 dark:text-rose-400"
+                                  : "text-foreground",
+                              )}
+                            >
+                              {pkg.errorCount}
+                            </span>
+                          </td>
+                          <td className="text-muted-foreground max-w-xs truncate p-3.5 font-sans text-xs">
+                            {pkg.errorDetails}
+                          </td>
+                          <td className="p-3.5 font-sans">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                              {pkg.qcStatus}
+                            </span>
+                          </td>
+                          <td className="p-3.5 font-sans">
+                            {pkg.qcResult === "Approved" ? (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                Approved
+                              </span>
+                            ) : (
+                              <div className="flex flex-col gap-1">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold text-rose-600 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-400">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
+                                  Failed
+                                </span>
+                                <span className="text-[9.5px] font-semibold text-amber-600 dark:text-amber-400">
+                                  ↗ Sent to Production Rework
+                                </span>
+                              </div>
+                            )}
                           </td>
                           <td className="text-muted-foreground p-3.5 font-mono whitespace-nowrap">
-                            {pkg.releasedAt}
+                            {pkg.completedAt}
                           </td>
-                          <td className="p-3.5 text-right">
-                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                              <CheckCircle2 className="h-3 w-3" /> Ready for
-                              Consolidation
-                            </span>
+                          <td className="p-3.5 text-right font-sans whitespace-nowrap">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedProdOutputForView({
+                                  productionOutput: pkg.productionOutput,
+                                  outputFileName: pkg.productionOutput,
+                                });
+                                setIsViewProdOutputOpen(true);
+                              }}
+                              className="border-border h-7 cursor-pointer gap-1.5 rounded-lg px-2.5 text-xs font-semibold"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              View
+                            </Button>
                           </td>
                         </tr>
                       ))}
@@ -3803,51 +4547,72 @@ export function ProjectWorkspaceView() {
           </div>
         </Card>
 
-        {/* Selected Batch Summary Card */}
+        {/* Selected Batch Summary Card - Top Batch Information Section */}
         <Card className="bg-card border-border rounded-xl p-5 shadow-xs">
-          <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-4 md:grid-cols-7">
             <div>
               <span className="text-muted-foreground block font-medium">
-                Batch ID
+                Batch Name
               </span>
-              <span className="text-foreground mt-0.5 block font-mono text-sm font-bold">
-                {selectedBatch.batchCode}
+              <span className="text-foreground mt-0.5 block truncate text-xs font-bold">
+                {selectedBatch.batchName ||
+                  `${selectedBatch.projectName} - ${selectedBatch.batchCode}`}
               </span>
             </div>
 
             <div>
               <span className="text-muted-foreground block font-medium">
-                Record Type
+                Type of Record
               </span>
-              <span className="text-primary mt-0.5 block text-sm font-semibold">
+              <span className="text-primary mt-0.5 block text-xs font-semibold">
                 {selectedBatch.recordType}
               </span>
             </div>
 
             <div>
               <span className="text-muted-foreground block font-medium">
-                Total Images
+                Language
               </span>
-              <span className="text-foreground mt-0.5 block text-sm font-bold">
-                {selectedBatch.totalImages} images
-              </span>
-            </div>
-
-            <div>
-              <span className="text-muted-foreground block font-medium">
-                Total Segments
-              </span>
-              <span className="text-foreground mt-0.5 block text-sm font-bold">
-                {selectedBatch.totalSegments} Segments
+              <span className="text-foreground mt-0.5 block text-xs font-semibold uppercase">
+                {selectedBatch.language}
               </span>
             </div>
 
             <div>
               <span className="text-muted-foreground block font-medium">
-                Date & Time
+                Source Type
+              </span>
+              <span className="text-foreground mt-0.5 block text-xs font-bold">
+                {selectedBatch.sourceType || "Images"}
+              </span>
+            </div>
+
+            <div>
+              <span className="text-muted-foreground block font-medium">
+                Total Source Units
+              </span>
+              <span className="text-foreground mt-0.5 block text-xs font-bold">
+                {selectedBatch.totalSourceUnits ||
+                  selectedBatch.totalImages ||
+                  500}
+              </span>
+            </div>
+
+            <div>
+              <span className="text-muted-foreground block font-medium">
+                Overall Status
+              </span>
+              <span className="bg-primary/10 text-primary border-primary/20 mt-0.5 inline-block rounded-full border px-2 py-0.5 font-mono text-[11px] font-bold">
+                {selectedBatch.status || "COMPLETED"}
+              </span>
+            </div>
+
+            <div>
+              <span className="text-muted-foreground block font-medium">
+                Last Updated
               </span>
               <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
-                {selectedBatch.assignedDate}
+                {selectedBatch.lastUpdated || "6 Sep 2026 12:10pm"}
               </span>
             </div>
           </div>

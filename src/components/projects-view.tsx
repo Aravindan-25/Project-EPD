@@ -37,7 +37,7 @@ const STAGE_GROUPS: { name: ProjectStage; dotColor: string }[] = [
   { name: "New", dotColor: "bg-amber-400" },
   { name: "In Discovery", dotColor: "bg-emerald-400" },
   { name: "Sprint Planning", dotColor: "bg-slate-400" },
-  { name: "In Development", dotColor: "bg-[#7C66DC]" },
+  { name: "In Development", dotColor: "bg-primary" },
   { name: "In UAT", dotColor: "bg-cyan-400" },
   { name: "Released & In Support", dotColor: "bg-blue-500" },
   { name: "In Maintenance", dotColor: "bg-indigo-400" },
@@ -297,26 +297,29 @@ export function ProjectsView() {
         />
       ) : (
         <div className="flex-1 overflow-auto">
-          <table className="w-full min-w-[1100px] table-fixed border-collapse text-left text-xs">
+          <table className="w-full min-w-[1000px] table-fixed border-collapse text-left text-xs">
             {/* Sticky Table Column Headers */}
             <thead className="border-border bg-secondary text-muted-foreground sticky top-0 z-10 border-b font-medium tracking-wider uppercase opacity-100 shadow-sm">
               <tr>
-                <th className="bg-secondary w-[22%] p-3.5 pl-6 font-semibold">
+                <th className="bg-secondary w-[18%] p-3.5 pl-6 font-semibold">
                   Name
                 </th>
-                <th className="bg-secondary w-[12%] p-3.5 font-semibold">
+                <th className="bg-secondary w-[13%] p-3.5 font-semibold">
+                  Department
+                </th>
+                <th className="bg-secondary w-[8%] p-3.5 font-semibold">
                   Stage
                 </th>
                 <th className="bg-secondary w-[16%] p-3.5 font-semibold">
                   Period
                 </th>
-                <th className="bg-secondary w-[18%] p-3.5 font-semibold">
+                <th className="bg-secondary w-[14%] p-3.5 font-semibold">
                   Manager
                 </th>
-                <th className="bg-secondary w-[12%] p-3.5 font-semibold">
+                <th className="bg-secondary w-[8%] p-3.5 font-semibold">
                   Progress
                 </th>
-                <th className="bg-secondary w-[20%] p-3.5 pr-6 text-right font-semibold">
+                <th className="bg-secondary w-[23%] p-3.5 pr-6 text-right font-semibold">
                   Actions
                 </th>
               </tr>
@@ -325,7 +328,7 @@ export function ProjectsView() {
               {filteredProjects.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="text-muted-foreground py-12 text-center text-xs"
                   >
                     No projects found for the selected criteria.
@@ -344,7 +347,7 @@ export function ProjectsView() {
                       {/* Stage Group Section Title Header */}
                       <tr className="bg-secondary/60 border-border border-t border-b">
                         <td
-                          colSpan={6}
+                          colSpan={7}
                           className="text-foreground py-2.5 pr-6 pl-6 text-xs font-semibold"
                         >
                           <div className="flex items-center gap-2">
@@ -408,6 +411,18 @@ export function ProjectsView() {
                             </div>
                           </td>
 
+                          {/* Department Column */}
+                          <td className="px-3 py-3">
+                            <span className="text-foreground truncate text-xs font-medium">
+                              {project.department === "data_processing"
+                                ? "Data Processing"
+                                : project.department === "development"
+                                  ? "Software Development"
+                                  : project.department ||
+                                    "Software Development"}
+                            </span>
+                          </td>
+
                           {/* Stage Column */}
                           <td className="px-3 py-3">
                             <Badge
@@ -453,7 +468,7 @@ export function ProjectsView() {
                           </td>
 
                           {/* Actions Column */}
-                          <td className="py-3 pr-6 pl-3 text-right">
+                          <td className="py-3 pr-6 pl-3 text-right whitespace-nowrap">
                             <div className="inline-flex items-center gap-1">
                               {/* Manage Team & Tech Lead Button */}
                               <ManageTeamDialog
