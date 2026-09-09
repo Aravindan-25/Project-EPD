@@ -61,6 +61,8 @@ import {
   X,
   Download,
   Image as ImageIcon,
+  ArrowRight,
+  Play,
 } from "lucide-react";
 import { USER_PROFILES, type UserRoleProfile } from "@/types/project";
 import { Button } from "@/components/ui/button";
@@ -5054,20 +5056,20 @@ export function SprintsView() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-5 text-xs">
+            <div className="grid grid-cols-[130px_1fr] items-center gap-x-4 gap-y-3.5 text-xs">
               {/* Status Picker */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-muted-foreground font-semibold">
-                  Status
-                </span>
+              <span className="text-muted-foreground font-semibold">
+                Status
+              </span>
+              <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="border-border bg-card hover:bg-secondary/60 flex cursor-pointer items-center gap-2 rounded-xs border p-1.5 text-left outline-none"
+                      className="border-border bg-card hover:bg-secondary/60 flex w-full cursor-pointer items-center gap-2 rounded-xs border p-1.5 text-left outline-none"
                     >
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
-                      <span className="text-foreground font-bold">
+                      <span className="text-foreground truncate font-bold">
                         {selectedTaskDetail.status}
                       </span>
                     </button>
@@ -5103,15 +5105,15 @@ export function SprintsView() {
               </div>
 
               {/* Priority Picker */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-muted-foreground font-semibold">
-                  Priority
-                </span>
+              <span className="text-muted-foreground font-semibold">
+                Priority
+              </span>
+              <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="border-border bg-card hover:bg-secondary/60 text-foreground cursor-pointer rounded-xs border p-1.5 text-left font-semibold outline-none"
+                      className="border-border bg-card hover:bg-secondary/60 text-foreground w-full cursor-pointer truncate rounded-xs border p-1.5 text-left font-semibold outline-none"
                     >
                       {selectedTaskDetail.priority || "No Priority"}
                     </button>
@@ -5146,15 +5148,15 @@ export function SprintsView() {
               </div>
 
               {/* Assignee Picker */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-muted-foreground font-semibold">
-                  Assignee
-                </span>
+              <span className="text-muted-foreground font-semibold">
+                Assignee
+              </span>
+              <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="border-border bg-card hover:bg-secondary/60 flex cursor-pointer items-center gap-2 rounded-xs border p-1.5 text-left outline-none"
+                      className="border-border bg-card hover:bg-secondary/60 flex w-full cursor-pointer items-center gap-2 rounded-xs border p-1.5 text-left outline-none"
                     >
                       <div
                         className={cn(
@@ -5211,27 +5213,23 @@ export function SprintsView() {
               </div>
 
               {/* Estimated Effort */}
-              <div className="flex flex-col gap-1">
-                <span className="text-muted-foreground font-semibold">
-                  Estimated Effort
-                </span>
-                <div className="flex items-center gap-1.5 font-bold text-amber-500">
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  <span>4h</span>
-                  <Info className="text-muted-foreground ml-0.5 h-3 w-3 cursor-pointer" />
-                </div>
+              <span className="text-muted-foreground py-2 font-semibold">
+                Estimated Effort
+              </span>
+              <div className="flex items-center gap-1.5 font-bold text-amber-500">
+                <AlertTriangle className="h-3.5 w-3.5" />
+                <span>4h</span>
+                <Info className="text-muted-foreground ml-0.5 h-3 w-3 cursor-pointer" />
               </div>
 
               {/* Actual Effort */}
-              <div className="flex flex-col gap-1">
-                <span className="text-muted-foreground font-semibold">
-                  Actual Effort
-                </span>
-                <div className="flex items-center gap-1.5 font-bold text-amber-500">
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  <span>4h</span>
-                  <Info className="text-muted-foreground ml-0.5 h-3 w-3 cursor-pointer" />
-                </div>
+              <span className="text-muted-foreground font-semibold">
+                Actual Effort
+              </span>
+              <div className="flex items-center gap-1.5 font-bold text-amber-500">
+                <AlertTriangle className="h-3.5 w-3.5" />
+                <span>4h</span>
+                <Info className="text-muted-foreground ml-0.5 h-3 w-3 cursor-pointer" />
               </div>
             </div>
 
@@ -6952,23 +6950,43 @@ export function SprintsView() {
             </Button>
           </div>
         ) : (
-          /* GENERATED SPRINT TIMELINE LIST (SPEC MATCHING SCREENSHOT) */
-          <div className="relative flex flex-col gap-4 pl-24">
-            {/* Vertical Timeline Guide Line (Positioned at 70px) */}
-            <div className="bg-border/80 absolute top-6 bottom-6 left-[70px] z-0 w-[2px]" />
+          /* GENERATED SPRINT TIMELINE LIST (MODERN & PREMIUM DESIGN) */
+          <div className="relative flex flex-col gap-3.5 py-1 pr-1 pl-28">
+            {/* Vertical Timeline Guide Line (Positioned at 78px) */}
+            <div className="from-primary/80 via-border to-border/30 absolute top-5 bottom-5 left-[78px] z-0 w-[2px] bg-gradient-to-b" />
 
             {sprints.map((sprint) => {
               const isSelected = sprint.id === selectedSprintId;
+              const isCurrent = sprint.status === "Current";
+              const isCompleted = sprint.status === "Completed";
+              const isPlanning = sprint.status === "Planning";
 
               return (
                 <div key={sprint.id} className="relative flex items-center">
                   {/* Date Node Label (Positioned cleanly to the LEFT of the line) */}
-                  <div className="text-muted-foreground absolute -left-[96px] w-[56px] text-right font-mono text-xs font-semibold">
+                  <div
+                    className={cn(
+                      "absolute -left-[108px] w-[64px] text-right font-mono text-xs font-bold tracking-tight transition-colors",
+                      isCurrent
+                        ? "text-primary scale-105 font-extrabold"
+                        : isCompleted
+                          ? "text-emerald-500"
+                          : "text-muted-foreground/80",
+                    )}
+                  >
                     {sprint.dateNode}
                   </div>
 
-                  {/* Node Bullet Circle (Centered perfectly ON the 70px line) */}
-                  <div className="border-card bg-border absolute -left-[29px] z-10 h-2.5 w-2.5 rounded-full border-2 shadow-2xs" />
+                  {/* Node Bullet Indicator (Centered ON the 78px line) */}
+                  {isCurrent ? (
+                    <div className="border-primary bg-primary ring-primary/20 absolute -left-[35px] z-10 h-3.5 w-3.5 animate-pulse rounded-full border-2 shadow-[0_0_12px_rgba(59,130,246,0.7)] ring-4" />
+                  ) : isCompleted ? (
+                    <div className="absolute -left-[34px] z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-emerald-500 bg-emerald-500 text-white shadow-2xs">
+                      <CheckCircle2 className="h-2.5 w-2.5" />
+                    </div>
+                  ) : (
+                    <div className="border-border bg-card absolute -left-[32px] z-10 h-3 w-3 rounded-full border-2 shadow-2xs" />
+                  )}
 
                   {/* Sprint Card Row (Positioned to the RIGHT of the line) */}
                   <div
@@ -6979,47 +6997,96 @@ export function SprintsView() {
                       }
                     }}
                     className={cn(
-                      "bg-card flex flex-1 cursor-pointer items-center justify-between gap-4 border p-3.5 shadow-xs transition-all",
+                      "bg-card group relative flex flex-1 cursor-pointer items-center justify-between gap-4 rounded-none border p-3.5 shadow-2xs transition-all duration-150 hover:shadow-xs",
                       isSelected
-                        ? "border-primary bg-primary/5 ring-primary/30 shadow-sm ring-1"
-                        : "border-border hover:border-primary/40",
+                        ? "border-primary bg-primary/[0.03] border-l-primary border-l-4 shadow-xs"
+                        : "border-border hover:border-primary/40 hover:bg-accent/40 border-l-4 border-l-transparent",
                     )}
                   >
-                    {/* Left Side: Checkmark Icon + Sprint Name */}
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-full border border-emerald-500/40 bg-emerald-500/10 p-1 text-emerald-500">
-                        <CheckCircle2 className="h-4 w-4" />
+                    {/* Left Side: Dynamic Status Icon + Sprint Name & Range */}
+                    <div className="flex min-w-0 items-center gap-3.5">
+                      <div
+                        className={cn(
+                          "flex h-9 w-9 shrink-0 items-center justify-center rounded-none border transition-colors",
+                          isCurrent &&
+                            "border-primary/30 bg-primary/10 text-primary",
+                          isCompleted &&
+                            "border-emerald-500/30 bg-emerald-500/10 text-emerald-500",
+                          isPlanning &&
+                            "border-amber-500/30 bg-amber-500/10 text-amber-500",
+                        )}
+                      >
+                        {isCurrent ? (
+                          <Zap className="fill-primary/30 h-4 w-4" />
+                        ) : isCompleted ? (
+                          <CheckCircle2 className="h-4 w-4" />
+                        ) : (
+                          <Calendar className="h-4 w-4" />
+                        )}
                       </div>
-                      <span className="text-foreground text-sm font-bold">
-                        {sprint.name}
-                      </span>
+
+                      <div className="flex flex-col truncate">
+                        <div className="flex items-center gap-2">
+                          <span className="text-foreground truncate text-sm font-bold tracking-tight">
+                            {sprint.name}
+                          </span>
+                          <span className="text-muted-foreground hidden font-mono text-[11px] font-medium sm:inline">
+                            ({getSprintDateRange(sprint)})
+                          </span>
+                        </div>
+                        <div className="text-muted-foreground mt-0.5 flex items-center gap-2 font-mono text-[11px]">
+                          <span>14 Calendar Days</span>
+                          <span>•</span>
+                          <span className="text-foreground/80 font-semibold">
+                            {sprint.hoursAllocated}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Right Side: Status Badge, Hours Badge, Pencil Edit */}
-                    <div className="flex items-center gap-3">
+                    {/* Right Side: Status Badge, Hours Badge, Quick Action & Pencil Edit */}
+                    <div className="flex shrink-0 items-center gap-2.5">
                       {/* Status Badge */}
                       <Badge
                         className={cn(
-                          "rounded-none px-2 py-0.5 text-[10px] font-semibold uppercase",
-                          sprint.status === "Completed" &&
+                          "rounded-none border px-2.5 py-0.5 font-mono text-[10px] font-bold tracking-wider uppercase",
+                          isCompleted &&
                             "border-emerald-500/40 bg-emerald-500/10 text-emerald-500",
-                          sprint.status === "Current" &&
-                            "border-primary/40 bg-primary/10 text-primary",
-                          sprint.status === "Planning" &&
+                          isCurrent &&
+                            "border-primary/50 bg-primary/10 text-primary flex items-center gap-1.5",
+                          isPlanning &&
                             "border-amber-500/40 bg-amber-500/10 text-amber-500",
                         )}
                       >
+                        {isCurrent && (
+                          <span className="bg-primary inline-block h-1.5 w-1.5 animate-ping rounded-full" />
+                        )}
                         {sprint.status}
                       </Badge>
 
                       {/* Hours Allocated Badge */}
                       <Badge
                         variant="outline"
-                        className="border-border bg-background text-foreground gap-1.5 rounded-none px-2.5 py-1 text-[11px] font-normal"
+                        className="border-border bg-background text-foreground hidden gap-1.5 rounded-none px-2.5 py-1 font-mono text-[11px] font-medium md:inline-flex"
                       >
                         <Clock className="text-muted-foreground h-3 w-3" />
                         <span>{sprint.hoursAllocated}</span>
                       </Badge>
+
+                      {/* Open Board Action Button */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSprintId(sprint.id);
+                          setActiveTab("current");
+                        }}
+                        className="border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground hidden h-7 gap-1 rounded-none text-xs font-semibold shadow-none transition-all sm:inline-flex"
+                      >
+                        <span>Board</span>
+                        <ArrowRight className="h-3 w-3" />
+                      </Button>
 
                       {/* Pencil Edit Icon */}
                       <Button
@@ -7029,7 +7096,7 @@ export function SprintsView() {
                           e.stopPropagation();
                           handleEditStart(sprint);
                         }}
-                        className="text-muted-foreground hover:text-foreground h-7 w-7 cursor-pointer rounded-none"
+                        className="text-muted-foreground hover:text-foreground hover:bg-accent h-7 w-7 cursor-pointer rounded-none"
                         title="Edit Sprint"
                       >
                         <Pencil className="h-3.5 w-3.5" />

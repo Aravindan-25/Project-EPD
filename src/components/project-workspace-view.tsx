@@ -222,16 +222,20 @@ export function ProjectWorkspaceView() {
   const [isReallocateOpen, setIsReallocateOpen] = useState(false);
   const [isAllocateQCOpen, setIsAllocateQCOpen] = useState(false);
   const [isReallocateQCOpen, setIsReallocateQCOpen] = useState(false);
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const [selectedSegmentForAlloc, setSelectedSegmentForAlloc] =
-    useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [selectedSegmentForAlloc, setSelectedSegmentForAlloc] = useState<Record<
+    string,
+    any
+  > | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedSegmentForRealloc, setSelectedSegmentForRealloc] =
-    useState<any>(null);
+    useState<Record<string, any> | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedSegmentForQCAlloc, setSelectedSegmentForQCAlloc] =
-    useState<any>(null);
+    useState<Record<string, any> | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedSegmentForQCRealloc, setSelectedSegmentForQCRealloc] =
-    useState<any>(null);
-  /* eslint-enable @typescript-eslint/no-explicit-any */
+    useState<Record<string, any> | null>(null);
   const [selectedProdEmployee, setSelectedProdEmployee] = useState("EMP-001");
   const [selectedQCEmployee, setSelectedQCEmployee] = useState("EMP-005");
   const [selectedQCSegmentIds, setSelectedQCSegmentIds] = useState<string[]>(
