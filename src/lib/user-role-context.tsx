@@ -149,30 +149,28 @@ const UserRoleContext = createContext<UserRoleContextType | undefined>(
 );
 
 export function UserRoleProvider({ children }: { children: ReactNode }) {
-  const [role, setRoleState] = useState<RoleType>(() => {
+  const [role, setRoleState] = useState<RoleType>("ADMIN");
+  const [rolePermissionsMap, setRolePermissionsMap] = useState<
+    Record<RoleType, string[]>
+  >(INITIAL_ROLE_PERMISSIONS);
+
+  React.useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const rParam = params.get("role") as RoleType;
       const storedRole = localStorage.getItem("userRole") as RoleType;
       if (rParam && rParam in USER_ROLE_PROFILES) {
         localStorage.setItem("userRole", rParam);
-        return rParam;
+        queueMicrotask(() => setRoleState(rParam));
+      } else if (storedRole && storedRole in USER_ROLE_PROFILES) {
+        queueMicrotask(() => setRoleState(storedRole));
       }
-      if (storedRole && storedRole in USER_ROLE_PROFILES) {
-        return storedRole;
-      }
-    }
-    return "ADMIN";
-  });
-  const [rolePermissionsMap, setRolePermissionsMap] = useState<
-    Record<RoleType, string[]>
-  >(() => {
-    if (typeof window !== "undefined") {
+
       try {
         const storedPermissions = localStorage.getItem("rolePermissionsMap");
         if (storedPermissions) {
           const parsed = JSON.parse(storedPermissions);
-          return {
+          const updatedMap = {
             ADMIN: Array.from(
               new Set([
                 ...INITIAL_ROLE_PERMISSIONS.ADMIN,
@@ -185,6 +183,7 @@ export function UserRoleProvider({ children }: { children: ReactNode }) {
             ),
             EMPLOYEE: parsed.EMPLOYEE || INITIAL_ROLE_PERMISSIONS.EMPLOYEE,
           };
+          queueMicrotask(() => setRolePermissionsMap(updatedMap));
         }
       } catch (e) {
         console.error(
@@ -193,8 +192,7 @@ export function UserRoleProvider({ children }: { children: ReactNode }) {
         );
       }
     }
-    return INITIAL_ROLE_PERMISSIONS;
-  });
+  }, []);
 
   const setRole = (newRole: RoleType) => {
     setRoleState(newRole);
