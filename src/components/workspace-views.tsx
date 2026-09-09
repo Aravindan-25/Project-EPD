@@ -3600,6 +3600,8 @@ interface SprintTaskItem {
   assigneeInitials: string;
   assigneeColor: string;
   points?: string | number;
+  label?: string;
+  category?: string;
 }
 
 export function SprintsView() {
@@ -3652,8 +3654,9 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "1",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
+      label: "Testing",
     },
     {
       id: "t-92",
@@ -3664,8 +3667,9 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "1",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
+      label: "Backend",
     },
     {
       id: "t-93",
@@ -3676,8 +3680,9 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "1",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
+      label: "Feature",
     },
     {
       id: "t-94",
@@ -3688,8 +3693,9 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Priya Verma",
-      assigneeInitials: "2",
+      assigneeInitials: "PV",
       assigneeColor: "bg-indigo-500/20 text-indigo-500 border-indigo-500/40",
+      label: "UI/UX",
     },
     {
       id: "t-95",
@@ -3700,8 +3706,9 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Priya Verma",
-      assigneeInitials: "2",
+      assigneeInitials: "PV",
       assigneeColor: "bg-indigo-500/20 text-indigo-500 border-indigo-500/40",
+      label: "Database",
     },
     {
       id: "t-96",
@@ -3712,8 +3719,9 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Priya Verma",
-      assigneeInitials: "2",
+      assigneeInitials: "PV",
       assigneeColor: "bg-indigo-500/20 text-indigo-500 border-indigo-500/40",
+      label: "Frontend",
     },
     {
       id: "t-97",
@@ -3724,7 +3732,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Sahara Acharya",
-      assigneeInitials: "3",
+      assigneeInitials: "SA",
       assigneeColor: "bg-amber-500/20 text-amber-500 border-amber-500/40",
     },
     {
@@ -3736,7 +3744,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Sahara Acharya",
-      assigneeInitials: "3",
+      assigneeInitials: "SA",
       assigneeColor: "bg-amber-500/20 text-amber-500 border-amber-500/40",
     },
     {
@@ -3750,7 +3758,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "P",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
     },
     {
@@ -3762,7 +3770,7 @@ export function SprintsView() {
       dueDate: "Jan 05",
       createdDate: "Dec 22",
       assignee: "Gaurvi Sharmi",
-      assigneeInitials: "G",
+      assigneeInitials: "GS",
       assigneeColor: "bg-emerald-500/20 text-emerald-500 border-emerald-500/40",
     },
 
@@ -3776,7 +3784,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "AD",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
       points: "2",
     },
@@ -3789,7 +3797,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Gaurvi Sharmi",
-      assigneeInitials: "BD",
+      assigneeInitials: "GS",
       assigneeColor: "bg-emerald-500/20 text-emerald-500 border-emerald-500/40",
       points: "3",
     },
@@ -3802,7 +3810,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "AD",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
       points: "3",
     },
@@ -3815,7 +3823,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Gaurvi Sharmi",
-      assigneeInitials: "BD",
+      assigneeInitials: "GS",
       assigneeColor: "bg-emerald-500/20 text-emerald-500 border-emerald-500/40",
       points: "4",
     },
@@ -3830,7 +3838,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Julian Thorne",
-      assigneeInitials: "DT",
+      assigneeInitials: "JT",
       assigneeColor: "bg-purple-500/20 text-purple-500 border-purple-500/40",
       points: "3",
     },
@@ -3843,7 +3851,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Julian Thorne",
-      assigneeInitials: "DT",
+      assigneeInitials: "JT",
       assigneeColor: "bg-purple-500/20 text-purple-500 border-purple-500/40",
       points: "4",
     },
@@ -3858,7 +3866,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Gaurvi Sharmi",
-      assigneeInitials: "BD",
+      assigneeInitials: "GS",
       assigneeColor: "bg-emerald-500/20 text-emerald-500 border-emerald-500/40",
       points: "1",
     },
@@ -3871,7 +3879,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "AD",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
       points: "1",
     },
@@ -3884,7 +3892,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Gaurvi Sharmi",
-      assigneeInitials: "BD",
+      assigneeInitials: "GS",
       assigneeColor: "bg-emerald-500/20 text-emerald-500 border-emerald-500/40",
       points: "2",
     },
@@ -3897,7 +3905,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "AD",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
       points: "2",
     },
@@ -3910,7 +3918,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "AD",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
       points: "3",
     },
@@ -3925,7 +3933,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Elena Vance",
-      assigneeInitials: "CP",
+      assigneeInitials: "EV",
       assigneeColor: "bg-rose-500/20 text-rose-500 border-rose-500/40",
       points: "2",
     },
@@ -3938,7 +3946,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Elena Vance",
-      assigneeInitials: "CP",
+      assigneeInitials: "EV",
       assigneeColor: "bg-rose-500/20 text-rose-500 border-rose-500/40",
       points: "3",
     },
@@ -3951,7 +3959,7 @@ export function SprintsView() {
       dueDate: "Jan 12",
       createdDate: "Dec 23",
       assignee: "Priya Verma",
-      assigneeInitials: "P",
+      assigneeInitials: "PV",
       assigneeColor: "bg-indigo-500/20 text-indigo-500 border-indigo-500/40",
     },
 
@@ -3965,7 +3973,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "AD",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
       points: "1",
     },
@@ -3978,7 +3986,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Gaurvi Sharmi",
-      assigneeInitials: "BD",
+      assigneeInitials: "GS",
       assigneeColor: "bg-emerald-500/20 text-emerald-500 border-emerald-500/40",
       points: "2",
     },
@@ -3991,7 +3999,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "AD",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
       points: "2",
     },
@@ -4006,7 +4014,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "AD",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
       points: "2",
     },
@@ -4019,7 +4027,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Gaurvi Sharmi",
-      assigneeInitials: "BD",
+      assigneeInitials: "GS",
       assigneeColor: "bg-emerald-500/20 text-emerald-500 border-emerald-500/40",
       points: "2",
     },
@@ -4032,7 +4040,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "AD",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
       points: "2",
     },
@@ -4045,7 +4053,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Gaurvi Sharmi",
-      assigneeInitials: "BD",
+      assigneeInitials: "GS",
       assigneeColor: "bg-emerald-500/20 text-emerald-500 border-emerald-500/40",
       points: "3",
     },
@@ -4058,7 +4066,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "AD",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
       points: "3",
     },
@@ -4071,7 +4079,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Gaurvi Sharmi",
-      assigneeInitials: "BD",
+      assigneeInitials: "GS",
       assigneeColor: "bg-emerald-500/20 text-emerald-500 border-emerald-500/40",
       points: "4",
     },
@@ -4084,7 +4092,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Pritam Shukla",
-      assigneeInitials: "AD",
+      assigneeInitials: "PS",
       assigneeColor: "bg-sky-500/20 text-sky-500 border-sky-500/40",
       points: "1",
     },
@@ -4097,7 +4105,7 @@ export function SprintsView() {
       dueDate: "Jan 08",
       createdDate: "Dec 20",
       assignee: "Gaurvi Sharmi",
-      assigneeInitials: "BD",
+      assigneeInitials: "GS",
       assigneeColor: "bg-emerald-500/20 text-emerald-500 border-emerald-500/40",
       points: "1",
     },
@@ -4110,7 +4118,7 @@ export function SprintsView() {
       dueDate: "Jan 05",
       createdDate: "Dec 22",
       assignee: "Sahara Acharya",
-      assigneeInitials: "S",
+      assigneeInitials: "SA",
       assigneeColor: "bg-amber-500/20 text-amber-500 border-amber-500/40",
     },
   ]);
@@ -5894,32 +5902,102 @@ export function SprintsView() {
                                     "border-primary scale-95 border-dashed opacity-35 shadow-none",
                                 )}
                               >
+                                {/* Top Header: Task ID Badge & Priority Badge */}
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-muted-foreground bg-secondary/80 border-border/70 rounded-md border px-2 py-0.5 font-mono text-[10px] font-bold tracking-tight">
+                                    {task.code}
+                                  </span>
+
+                                  {task.priority &&
+                                    task.priority !== "No Priority" && (
+                                      <span
+                                        className={cn(
+                                          "flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-bold",
+                                          task.priority === "Urgent" &&
+                                            "border-rose-500/30 bg-rose-500/15 text-rose-500",
+                                          task.priority === "High" &&
+                                            "border-orange-500/30 bg-orange-500/15 text-orange-500",
+                                          task.priority === "Medium" &&
+                                            "border-amber-500/30 bg-amber-500/15 text-amber-400",
+                                          task.priority === "Low" &&
+                                            "border-slate-500/30 bg-slate-500/15 text-slate-400",
+                                        )}
+                                      >
+                                        <span
+                                          className={cn(
+                                            "h-1.5 w-1.5 rounded-full",
+                                            task.priority === "Urgent" &&
+                                              "bg-rose-500",
+                                            task.priority === "High" &&
+                                              "bg-orange-500",
+                                            task.priority === "Medium" &&
+                                              "bg-amber-400",
+                                            task.priority === "Low" &&
+                                              "bg-slate-400",
+                                          )}
+                                        />
+                                        {task.priority}
+                                      </span>
+                                    )}
+                                </div>
+
                                 {/* Card Title */}
                                 <span className="text-foreground group-hover:text-primary text-xs leading-snug font-bold transition-colors">
                                   {task.title}
                                 </span>
 
-                                {/* Card Metadata Footer */}
-                                <div className="flex items-center justify-between gap-2 pt-0.5">
+                                {/* Bottom Row: Label Badge & Assignee Profile Avatar */}
+                                <div className="border-border/40 mt-0.5 flex items-center justify-between gap-2 border-t pt-2">
+                                  {/* Label Badge */}
                                   <div className="flex min-w-0 items-center gap-1.5">
-                                    {task.priority === "Urgent" ||
-                                    task.priority === "High" ? (
-                                      <span className="h-2 w-2 shrink-0 rounded-full bg-rose-500 shadow-xs shadow-rose-500/50" />
-                                    ) : task.status.toLowerCase() === "done" ||
-                                      task.status.toLowerCase() ===
-                                        "completed" ? (
-                                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                                    ) : (
-                                      <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400 shadow-xs shadow-amber-400/50" />
-                                    )}
-                                    <span className="text-muted-foreground font-mono text-[11px] font-bold">
-                                      {task.code}
+                                    <span className="bg-primary/10 text-primary border-primary/20 flex max-w-[130px] items-center gap-1 truncate rounded-md border px-2 py-0.5 text-[10px] font-semibold">
+                                      <Tag className="h-2.5 w-2.5 shrink-0 opacity-70" />
+                                      <span className="truncate">
+                                        {task.label ||
+                                          task.category ||
+                                          "Feature"}
+                                      </span>
                                     </span>
                                   </div>
 
-                                  <div className="bg-secondary text-secondary-foreground border-border/70 flex shrink-0 items-center gap-1 rounded-md border px-2 py-0.5 font-mono text-[10px] font-bold">
-                                    <span>{task.assigneeInitials}</span>
-                                    {task.points && <span>{task.points}</span>}
+                                  {/* Right side: Points & Assignee Profile Avatar */}
+                                  <div className="flex shrink-0 items-center gap-1.5">
+                                    {task.points && (
+                                      <span className="bg-secondary text-secondary-foreground border-border/70 rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-bold">
+                                        {task.points}
+                                      </span>
+                                    )}
+                                    {(() => {
+                                      const rawInitials = task.assigneeInitials;
+                                      const initials =
+                                        rawInitials &&
+                                        !/^\d+$/.test(rawInitials)
+                                          ? rawInitials
+                                          : task.assignee
+                                            ? task.assignee
+                                                .split(" ")
+                                                .map((n) => n[0])
+                                                .join("")
+                                                .slice(0, 2)
+                                                .toUpperCase()
+                                            : "U";
+                                      return (
+                                        <div
+                                          className={cn(
+                                            "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[9px] font-bold shadow-2xs transition-transform hover:scale-105",
+                                            task.assigneeColor ||
+                                              "border-sky-500/40 bg-sky-500/20 text-sky-500",
+                                          )}
+                                          title={
+                                            task.assignee
+                                              ? `Assignee: ${task.assignee}`
+                                              : "Unassigned"
+                                          }
+                                        >
+                                          {initials}
+                                        </div>
+                                      );
+                                    })()}
                                   </div>
                                 </div>
                               </div>
@@ -6850,7 +6928,14 @@ export function SprintsView() {
                               dueDate: "Jan 14",
                               createdDate: item.createdDate,
                               assignee: item.assignee,
-                              assigneeInitials: item.assignee[0],
+                              assigneeInitials: item.assignee
+                                ? item.assignee
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")
+                                    .slice(0, 2)
+                                    .toUpperCase()
+                                : "U",
                               assigneeColor:
                                 "bg-sky-500/20 text-sky-500 border-sky-500/40",
                             };
@@ -6873,7 +6958,14 @@ export function SprintsView() {
                               dueDate: "Jan 14",
                               createdDate: item.createdDate,
                               assignee: item.assignee,
-                              assigneeInitials: item.assignee[0],
+                              assigneeInitials: item.assignee
+                                ? item.assignee
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")
+                                    .slice(0, 2)
+                                    .toUpperCase()
+                                : "U",
                               assigneeColor:
                                 "bg-sky-500/20 text-sky-500 border-sky-500/40",
                             };
@@ -6905,7 +6997,14 @@ export function SprintsView() {
                               dueDate: "Jan 14",
                               createdDate: item.createdDate,
                               assignee: item.assignee,
-                              assigneeInitials: item.assignee[0],
+                              assigneeInitials: item.assignee
+                                ? item.assignee
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")
+                                    .slice(0, 2)
+                                    .toUpperCase()
+                                : "U",
                               assigneeColor:
                                 "bg-sky-500/20 text-sky-500 border-sky-500/40",
                             };
