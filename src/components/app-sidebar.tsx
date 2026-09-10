@@ -26,6 +26,9 @@ import {
   Briefcase,
   User,
   CalendarDays,
+  TrendingUp,
+  CheckSquare,
+  MessageSquare,
 } from "lucide-react";
 import {
   Sidebar,
@@ -119,6 +122,31 @@ const allNavItems = [
     title: "Project Workspace",
     icon: LayoutGrid,
     href: "/projectworkspace",
+  },
+  {
+    id: "myprojects",
+    title: "My Projects",
+    icon: Briefcase,
+    href: "/myprojects",
+  },
+  {
+    id: "mywork",
+    title: "My Work",
+    icon: CheckSquare,
+    href: "/mywork",
+    badge: "3",
+  },
+  {
+    id: "myperformance",
+    title: "My Performance",
+    icon: TrendingUp,
+    href: "/myperformance",
+  },
+  {
+    id: "chatty",
+    title: "Chatty",
+    icon: MessageSquare,
+    href: "/chatty",
   },
   {
     id: "sprints",
@@ -261,15 +289,22 @@ export function AppSidebar() {
                         <Link href={getNavHref(item.href)}>
                           <div
                             className={cn(
-                              "flex items-center",
-                              isCollapsed ? "justify-center" : "gap-3",
+                              "flex items-center w-full",
+                              isCollapsed ? "justify-center" : "justify-between gap-2",
                             )}
                           >
-                            <Icon className="h-4 w-4 shrink-0" />
-                            {!isCollapsed && (
-                              <span className="text-xs font-medium">
-                                {item.title}
-                              </span>
+                            <div className="flex items-center gap-3">
+                              <Icon className="h-4 w-4 shrink-0" />
+                              {!isCollapsed && (
+                                <span className="text-xs font-medium">
+                                  {item.title}
+                                </span>
+                              )}
+                            </div>
+                            {!isCollapsed && (item as any).badge && (
+                              <Badge className="h-4 min-w-[16px] px-1 text-[9px] font-bold rounded-full bg-rose-500 text-white flex items-center justify-center border-none">
+                                {(item as any).badge}
+                              </Badge>
                             )}
                           </div>
                         </Link>

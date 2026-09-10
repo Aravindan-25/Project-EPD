@@ -17,7 +17,11 @@ export interface UserRoleProfile {
 
 export const NAV_MODULE_MAPPING: Record<string, string> = {
   Dashboard: "dashboard",
+  "My Projects": "myprojects",
+  "My Work": "mywork",
   "My Task": "tasks",
+  "My Performance": "myperformance",
+  Chatty: "chatty",
   "My Attendance": "attendance",
   "My Leaves": "leaves",
   "My Worklog": "worklog",
@@ -41,9 +45,13 @@ export const NAV_MODULE_MAPPING: Record<string, string> = {
 export const INITIAL_ROLE_PERMISSIONS: Record<RoleType, string[]> = {
   ADMIN: [
     "dashboard",
+    "myprojects",
+    "mywork",
     "projects",
     "projectworkspace",
     "tasks",
+    "myperformance",
+    "chatty",
     "sprints",
     "worklog",
     "weeklyworklog",
@@ -62,6 +70,8 @@ export const INITIAL_ROLE_PERMISSIONS: Record<RoleType, string[]> = {
     "employeesmanagement",
     "attendancemanagement",
     "attendance",
+    "myperformance",
+    "chatty",
     "assetsmanagement",
     "assets",
     "leaves",
@@ -71,10 +81,14 @@ export const INITIAL_ROLE_PERMISSIONS: Record<RoleType, string[]> = {
   ],
   PM: [
     "dashboard",
+    "myprojects",
+    "mywork",
     "projects",
     "projectworkspace",
     "sprints",
     "tasks",
+    "myperformance",
+    "chatty",
     "worklog",
     "weeklyworklog",
     "attendance",
@@ -85,8 +99,12 @@ export const INITIAL_ROLE_PERMISSIONS: Record<RoleType, string[]> = {
   ],
   EMPLOYEE: [
     "dashboard",
+    "myprojects",
+    "mywork",
     "sprints",
     "tasks",
+    "myperformance",
+    "chatty",
     "worklog",
     "attendance",
     "assets",
@@ -181,7 +199,12 @@ export function UserRoleProvider({ children }: { children: ReactNode }) {
             PM: Array.from(
               new Set([...INITIAL_ROLE_PERMISSIONS.PM, ...(parsed.PM || [])]),
             ),
-            EMPLOYEE: parsed.EMPLOYEE || INITIAL_ROLE_PERMISSIONS.EMPLOYEE,
+            EMPLOYEE: Array.from(
+              new Set([
+                ...INITIAL_ROLE_PERMISSIONS.EMPLOYEE,
+                ...(parsed.EMPLOYEE || []),
+              ]),
+            ),
           };
           queueMicrotask(() => setRolePermissionsMap(updatedMap));
         }

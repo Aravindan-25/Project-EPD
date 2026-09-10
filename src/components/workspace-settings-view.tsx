@@ -426,6 +426,14 @@ const DEFAULT_MODULES: ModulePermission[] = [
     delete: false,
   },
   {
+    id: "mod-18",
+    name: "Chatty",
+    accessScreen: true,
+    viewData: true,
+    editAdd: true,
+    delete: true,
+  },
+  {
     id: "mod-8",
     name: "Projects",
     accessScreen: true,
